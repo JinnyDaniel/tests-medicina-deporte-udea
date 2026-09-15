@@ -123,6 +123,30 @@
     .protocolo-fab span{ display:none; }
     .protocolo-fab{ padding:14px; border-radius:50%; }
   }
+
+  .info-btn{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:16px; height:16px; border-radius:50%; background:var(--verde);
+    color:#fff; font-size:0.66rem; font-weight:700; border:none; cursor:pointer;
+    vertical-align:middle; margin-left:4px; padding:0; line-height:1;
+  }
+  .info-btn:hover{ background:var(--verde-oscuro); }
+  .info-tooltip{
+    position:fixed; z-index:1200; max-width:280px; background:#fff;
+    border:1px solid var(--gris-borde); border-radius:8px; box-shadow:0 6px 20px rgba(0,0,0,0.18);
+    padding:10px 12px; font-size:0.8rem; line-height:1.45; color:var(--texto);
+    display:none;
+  }
+  .info-tooltip.visible{ display:block; }
+  .formula-box{
+    background:var(--gris-fondo); border:1px solid var(--gris-borde); border-radius:8px;
+    padding:12px 14px; margin-top:14px;
+  }
+  .formula-titulo{ margin:0 0 6px; font-weight:700; font-size:0.82rem; color:var(--verde-oscuro); }
+  .formula-tex{
+    margin:4px 0; font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:0.78rem; color:#333; line-height:1.5; word-break:break-word;
+  }
 </style>
 </head>
 <body>
@@ -208,6 +232,11 @@
     </div>
 
     <div class="fila">
+      <div><label>Nombre del contacto de emergencia</label><input type="text" id="contactoEmergenciaNombre"></div>
+      <div><label>Teléfono del contacto de emergencia</label><input type="tel" id="contactoEmergenciaTel"></div>
+    </div>
+
+    <div class="fila">
       <div><label>Enfermedades</label><input type="text" id="enfermedades"></div>
       <div><label>Medicamentos</label><input type="text" id="medicamentos"></div>
     </div>
@@ -226,7 +255,7 @@
     <div class="fila">
       <div><label>FC de reposo (lpm)</label><input type="number" id="fcReposo"></div>
       <div><label>TA de reposo (mmHg)</label><input type="text" id="taReposo"></div>
-      <div><label>FC máxima calculada¹ (220 − edad)</label><input type="text" id="fcMax" disabled></div>
+      <div><label>FC máxima calculada¹ (220 − edad) <button type="button" class="info-btn" data-tip="fcmax" aria-label="Definición">?</button></label><input type="text" id="fcMax" disabled></div>
     </div>
   </section>
 
@@ -282,14 +311,19 @@
   <!-- ===================== 4. HOJA DE REGISTRO ===================== -->
   <section class="bloque">
     <h2>5. Hoja de registro del test</h2>
-    <div class="nota-metodo" style="margin-top:0;">Se registran únicamente las variables descritas en el artículo original: Kline GM, Porcari JP, Hintermeister R, Freedson PS, Ward A, McCarron RF, Ross J, Rippe JM. Estimation of VO<sub>2</sub>max from a one-mile track walk, gender, age, and body weight. <em>Med Sci Sports Exerc.</em> 1987;19(3):253-9.</div>
+    <div class="nota-metodo" style="margin-top:0;">Kline GM, Porcari JP, Hintermeister R, Freedson PS, Ward A, McCarron RF, Ross J, Rippe JM. Estimation of VO<sub>2</sub>max from a one-mile track walk, gender, age, and body weight. <em>Med Sci Sports Exerc.</em> 1987;19(3):253-9.</div>
 
     <div class="fila" style="margin-top:14px;">
-      <div><label>Tiempo total T1 (min)</label><input type="number" id="t1min" min="0"></div>
+      <div><label>Tiempo total T1 (min) <button type="button" class="info-btn" data-tip="t1" aria-label="Definición">?</button></label><input type="number" id="t1min" min="0"></div>
       <div><label>Tiempo total T1 (seg adicionales)</label><input type="number" id="t1seg" min="0" max="59"></div>
-      <div><label>FC último cuarto de milla (HR1-4, lpm)</label><input type="number" id="hr14"></div>
+      <div><label>FC último cuarto de milla (HR1-4, lpm) <button type="button" class="info-btn" data-tip="hr14" aria-label="Definición">?</button></label><input type="number" id="hr14"></div>
     </div>
-    <div class="nota-metodo">Según el artículo: T1 es el tiempo total transcurrido en caminar la milla completa; HR1-4 es el promedio de las dos últimas lecturas de frecuencia cardíaca de 1 minuto (monitoreo continuo) al llegar al último cuarto de milla. Si en campo se toma una sola lectura puntual al finalizar, regístrelo como una aproximación práctica a este método, no como el procedimiento exacto del artículo.</div>
+
+    <div class="formula-box">
+      <p class="formula-titulo">Ecuación utilizada (Kline y cols., 1987):</p>
+      <p class="formula-tex">VO₂máx (L/min) = 6.9652 + 0.0091 × Peso(lb) − 0.0257 × Edad + 0.5955 × Sexo(H=1, M=0) − 0.2240 × T1(min) − 0.0115 × HR1-4(lpm)</p>
+      <p class="formula-tex">VO₂máx relativo (ml·kg⁻¹·min⁻¹) = VO₂máx (L/min) × 1000 ÷ Peso (kg)</p>
+    </div>
 
     <button type="button" style="margin-top:16px;" onclick="calcularVO2()">Calcular VO₂máx</button>
 
@@ -341,6 +375,8 @@
   <p class="protocolo-nota">HR1-4 = promedio de las dos últimas lecturas de FC de 1 min (monitoreo continuo) al llegar al último cuarto de milla. Una sola lectura puntual al finalizar es una aproximación práctica, no el procedimiento exacto del artículo original.<br>Kline GM, Porcari JP, Hintermeister R, Freedson PS, Ward A, McCarron RF, Ross J, Rippe JM. <em>Med Sci Sports Exerc.</em> 1987;19(3):253-9.</p>
 </div>
 
+<div class="info-tooltip" id="infoTooltip"></div>
+
 <footer>
   <div class="footer-contacto">
     <a href="https://www.instagram.com/daniel.sportsmed" target="_blank" rel="noopener">
@@ -361,6 +397,42 @@
 </footer>
 
 <script>
+// ---------- Tooltips de definición ("?") ----------
+const DEFINICIONES_CAMPO = {
+  t1: "Tiempo total transcurrido en caminar la milla completa (1609 m).",
+  hr14: "Promedio de las dos últimas lecturas de frecuencia cardíaca de 1 minuto (monitoreo continuo) al llegar al último cuarto de milla. Una lectura puntual única al finalizar es una aproximación práctica a este método.",
+  fcmax: "El artículo emplea la frecuencia cardíaca máxima edad-predicha como uno de los criterios para confirmar el esfuerzo máximo real en su propio protocolo de banda, sin especificar una fórmula propia para calcularla. Aquí se aplica la convención estándar de la época: 220 − edad (Fox y cols., 1971).",
+};
+
+document.querySelectorAll(".info-btn").forEach((btn) => {
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const tooltip = document.getElementById("infoTooltip");
+    const clave = btn.dataset.tip;
+    if (tooltip.classList.contains("visible") && tooltip.dataset.actual === clave) {
+      tooltip.classList.remove("visible");
+      return;
+    }
+    tooltip.textContent = DEFINICIONES_CAMPO[clave] || "";
+    tooltip.dataset.actual = clave;
+    tooltip.style.left = "0px";
+    tooltip.style.top = "0px";
+    tooltip.classList.add("visible");
+    const rect = btn.getBoundingClientRect();
+    const anchoTip = tooltip.offsetWidth;
+    let left = rect.left;
+    if (left + anchoTip > window.innerWidth - 12) left = Math.max(12, window.innerWidth - anchoTip - 12);
+    tooltip.style.left = left + "px";
+    tooltip.style.top = (rect.bottom + 8) + "px";
+  });
+});
+document.addEventListener("click", (e) => {
+  const tooltip = document.getElementById("infoTooltip");
+  if (tooltip.classList.contains("visible") && !tooltip.contains(e.target) && !e.target.classList.contains("info-btn")) {
+    tooltip.classList.remove("visible");
+  }
+});
+
 // ---------- Protocolo flotante ----------
 function toggleProtocolo() {
   const panel = document.getElementById("protocoloPanel");
@@ -691,6 +763,7 @@ async function descargarReporte() {
     ["Nombre", val("nombre")], ["Edad", val("edad")],
     ["ID", val("id")], ["Sexo", sexoTexto],
     ["Fecha", val("fecha")], ["Examinador", val("examinador")],
+    ["Contacto de emergencia", val("contactoEmergenciaNombre")], ["Tel. de emergencia", val("contactoEmergenciaTel")],
   ], y);
 
   y = tituloSeccionPDF(doc, "Antecedentes", y);
