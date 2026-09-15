@@ -51,9 +51,10 @@
   .titulo-pagina{ text-align:center; margin-bottom:6px; color:var(--verde-oscuro); }
   .subtitulo-pagina{ text-align:center; color:#555; margin-top:0; margin-bottom:26px; font-style:italic; }
   label{ display:block; font-size:0.86rem; font-weight:600; margin:10px 0 4px; }
-  input[type=text], input[type=number], select{
+  input[type=text], input[type=number], input[type=tel], select, textarea{
     width:100%; padding:8px 10px; border:1px solid #bbb; border-radius:6px; font-size:0.92rem;
   }
+  textarea{ font-family:inherit; resize:vertical; }
   .fila{ display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; }
   .parq-item{ border-bottom:1px solid #eee; padding:12px 0; display:flex; justify-content:space-between; gap:14px; align-items:flex-start; }
   .parq-item p{ margin:0; font-size:0.88rem; flex:1; }
@@ -75,6 +76,7 @@
   .resultado{ margin-top:18px; padding:16px; background:#eef7f0; border:1px solid #cfe8d7; border-radius:8px; display:none; }
   .resultado .valor{ font-size:1.4rem; font-weight:700; color:var(--verde-oscuro); }
   .nota-metodo{ font-size:0.78rem; color:#666; margin-top:6px; }
+  .parq-intro{ font-size:0.88rem; color:#555; margin:2px 0 16px; }
   .nota-pdf{ font-size:0.78rem; color:#777; margin-top:10px; }
   .cita{ font-size:0.75rem; color:#777; border-top:1px solid #eee; padding-top:10px; margin-top:16px; }
   .registro-tabla{ width:100%; border-collapse:collapse; margin-top:10px; }
@@ -139,14 +141,18 @@
   }
   .info-tooltip.visible{ display:block; }
   .formula-box{
-    background:var(--gris-fondo); border:1px solid var(--gris-borde); border-radius:8px;
-    padding:12px 14px; margin-top:14px;
+    background:#eef7f0; border:1px solid #cfe8d7; border-left:4px solid var(--verde);
+    border-radius:8px; padding:14px 16px; margin-top:16px; margin-bottom:10px;
   }
-  .formula-titulo{ margin:0 0 6px; font-weight:700; font-size:0.82rem; color:var(--verde-oscuro); }
+  .formula-titulo{
+    margin:0 0 10px; font-weight:700; font-size:0.72rem; color:var(--verde-oscuro);
+    text-transform:uppercase; letter-spacing:0.04em;
+  }
   .formula-tex{
-    margin:4px 0; font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
-    font-size:0.78rem; color:#333; line-height:1.5; word-break:break-word;
+    margin:0 0 8px; font-size:0.88rem; color:var(--texto); line-height:1.7; word-break:break-word;
   }
+  .formula-tex:last-child{ margin-bottom:0; }
+  .formula-tex .op{ color:var(--verde-oscuro); font-weight:600; }
 </style>
 </head>
 <body>
@@ -262,6 +268,7 @@
   <!-- ===================== 2. PAR-Q ===================== -->
   <section class="bloque">
     <h2>3. PAR-Q</h2>
+    <p class="parq-intro">Cuestionario de aptitud para la actividad física: identifica factores de riesgo que podrían contraindicar la realización de la prueba antes de someter al participante a esfuerzo físico.</p>
     <div id="parqLista"></div>
     <div id="avisoParq">⚠ Se marcó "Sí" en al menos una pregunta del PAR-Q. Se recomienda evaluación médica adicional antes de realizar la prueba.</div>
   </section>
@@ -320,12 +327,12 @@
     </div>
 
     <div class="formula-box">
-      <p class="formula-titulo">Ecuación utilizada (Kline y cols., 1987):</p>
-      <p class="formula-tex">VO₂máx (L/min) = 6.9652 + 0.0091 × Peso(lb) − 0.0257 × Edad + 0.5955 × Sexo(H=1, M=0) − 0.2240 × T1(min) − 0.0115 × HR1-4(lpm)</p>
-      <p class="formula-tex">VO₂máx relativo (ml·kg⁻¹·min⁻¹) = VO₂máx (L/min) × 1000 ÷ Peso (kg)</p>
+      <p class="formula-titulo">Ecuación utilizada (Kline y cols., 1987)</p>
+      <p class="formula-tex"><strong>VO₂máx (L/min)</strong> <span class="op">=</span> 6.9652 + 0.0091 × Peso(lb) − 0.0257 × Edad + 0.5955 × Sexo(H=1, M=0) − 0.2240 × T1(min) − 0.0115 × HR1-4(lpm)</p>
+      <p class="formula-tex"><strong>VO₂máx relativo (ml·kg⁻¹·min⁻¹)</strong> <span class="op">=</span> VO₂máx (L/min) × 1000 ÷ Peso (kg)</p>
     </div>
 
-    <button type="button" style="margin-top:16px;" onclick="calcularVO2()">Calcular VO₂máx</button>
+    <button type="button" style="margin-top:0;" onclick="calcularVO2()">Calcular VO₂máx</button>
 
     <div class="resultado" id="resultadoBox">
       <p>VO₂máx: <span class="valor" id="valorLmin">—</span> L/min</p>
@@ -339,6 +346,9 @@
     </div>
     <label>Síntomas</label>
     <input type="text" id="sintomas">
+
+    <label>Observaciones</label>
+    <textarea id="observaciones" rows="3"></textarea>
 
     <div style="margin-top:18px;">
       <button type="button" onclick="descargarReporte()">Descargar reporte del test (PDF)</button>
@@ -397,6 +407,22 @@
 </footer>
 
 <script>
+// ---------- Fecha y hora automáticas (editables) ----------
+(function inicializarFechaHora() {
+  const ahora = new Date();
+  const dd = String(ahora.getDate()).padStart(2, "0");
+  const mm = String(ahora.getMonth() + 1).padStart(2, "0");
+  const aaaa = ahora.getFullYear();
+  document.getElementById("fecha").value = `${dd}/${mm}/${aaaa}`;
+
+  let horas = ahora.getHours();
+  const minutos = String(ahora.getMinutes()).padStart(2, "0");
+  const ampm = horas >= 12 ? "p.m." : "a.m.";
+  horas = horas % 12;
+  if (horas === 0) horas = 12;
+  document.getElementById("hora").value = `${horas}:${minutos} ${ampm}`;
+})();
+
 // ---------- Tooltips de definición ("?") ----------
 const DEFINICIONES_CAMPO = {
   t1: "Tiempo total transcurrido en caminar la milla completa (1609 m).",
@@ -781,6 +807,10 @@ async function descargarReporte() {
   ], y);
 
   y = tituloSeccionPDF(doc, "PAR-Q", y);
+  doc.setFontSize(7.8);
+  doc.setTextColor(...PDF_GRIS);
+  y = escribirParrafo(doc, "Cuestionario de aptitud para la actividad física: identifica factores de riesgo que podrían contraindicar la realización de la prueba.", MARGEN_X, y, ANCHO_UTIL, 3.6) + 3;
+  doc.setTextColor(0, 0, 0);
   const respuestas = respuestasParq();
   const positivas = respuestas.map((r, i) => ({ ...r, n: i + 1 })).filter(r => r.respuesta === "Sí");
   const sinResponder = respuestas.filter(r => r.respuesta === "(sin responder)").length;
@@ -841,6 +871,12 @@ async function descargarReporte() {
     ["FC de recuperación", val("fcRecuperacion")], ["TA de recuperación", val("taRecuperacion")],
     ["Síntomas", val("sintomas")], ["", ""],
   ], y);
+
+  doc.setFontSize(9.2);
+  doc.setFont(undefined, "bold");
+  doc.text("Observaciones:", MARGEN_X, y);
+  doc.setFont(undefined, "normal");
+  y = escribirParrafo(doc, val("observaciones") || "-", MARGEN_X, y + 5, ANCHO_UTIL, 4.4) + 3;
 
   doc.setFontSize(6.8);
   doc.setTextColor(...PDF_GRIS);
