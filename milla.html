@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test de caminata de 1 milla — Rockport Walk Test</title>
+<link rel="icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="180x180" href="favicon.png">
+<script src="jspdf.umd.min.js"></script>
+<style>
+  :root{
+    --verde:#0f5c33;
+    --verde-oscuro:#0a3d22;
+    --gris-fondo:#f5f6f5;
+    --gris-borde:#dcdfdc;
+    --texto:#1c1f1e;
+    --amarillo:#fbf4d8;
+    --amarillo-borde:#e4d78e;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:0;
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--gris-fondo);
+    color:var(--texto);
+  }
+  header{
+    background:#fff;
+    border-bottom:4px solid var(--verde);
+    padding:20px 24px;
+    display:flex; align-items:center; gap:20px; flex-wrap:wrap;
+  }
+  header img.logo-personal{ height:72px; }
+  header .titulos{ flex:1; min-width:220px; }
+  header .titulos h1{ margin:0; font-size:1rem; color:var(--verde-oscuro); }
+  header .titulos p{ margin:2px 0 0; font-size:0.82rem; color:#555; }
+  .header-contacto{ display:flex; gap:16px; flex-wrap:wrap; margin-top:8px; }
+  .header-contacto a{ display:inline-flex; align-items:center; gap:4px; font-size:0.74rem; color:var(--verde-oscuro); text-decoration:none; font-weight:500; }
+  .header-contacto a:hover{ text-decoration:underline; }
+  .header-contacto svg{ width:13px; height:13px; fill:var(--verde); flex-shrink:0; }
+  a.volver{ font-size:0.85rem; color:var(--verde-oscuro); text-decoration:none; }
+  main{ max-width:820px; margin:0 auto; padding:28px 18px 70px; }
+  section.bloque{
+    background:#fff; border:1px solid var(--gris-borde); border-radius:10px;
+    padding:22px 24px; margin-bottom:22px;
+  }
+  section.bloque h2{
+    margin-top:0; font-size:1.05rem; color:#fff; background:var(--verde);
+    padding:8px 14px; border-radius:6px; display:inline-block;
+  }
+  .titulo-pagina{ text-align:center; margin-bottom:6px; color:var(--verde-oscuro); }
+  .subtitulo-pagina{ text-align:center; color:#555; margin-top:0; margin-bottom:26px; font-style:italic; }
+  label{ display:block; font-size:0.86rem; font-weight:600; margin:10px 0 4px; }
+  input[type=text], input[type=number], select{
+    width:100%; padding:8px 10px; border:1px solid #bbb; border-radius:6px; font-size:0.92rem;
+  }
+  .fila{ display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; }
+  .parq-item{ border-bottom:1px solid #eee; padding:12px 0; display:flex; justify-content:space-between; gap:14px; align-items:flex-start; }
+  .parq-item p{ margin:0; font-size:0.88rem; flex:1; }
+  .parq-opciones{ display:flex; gap:14px; white-space:nowrap; padding-top:2px; }
+  .parq-opciones label{ margin:0; font-weight:400; display:flex; align-items:center; gap:4px; font-size:0.85rem; }
+  #avisoParq{ display:none; background:var(--amarillo); border:1px solid var(--amarillo-borde); border-radius:8px; padding:12px 14px; font-size:0.86rem; margin-top:14px; }
+  .texto-consentimiento{ font-size:0.9rem; line-height:1.5; }
+  .texto-consentimiento li{ margin-bottom:8px; }
+  .firma-wrap{ margin-top:16px; }
+  canvas#firmaCanvas{ border:1px dashed #999; border-radius:8px; width:100%; height:150px; touch-action:none; background:#fff; }
+  .firma-botones{ margin-top:8px; display:flex; gap:10px; }
+  button, .btn{
+    background:var(--verde); color:#fff; border:none; padding:10px 16px; border-radius:6px;
+    font-size:0.9rem; cursor:pointer;
+  }
+  button.secundario{ background:#888; }
+  button:disabled{ background:#b7bab6; cursor:not-allowed; }
+  .checkbox-consent{ display:flex; gap:8px; align-items:flex-start; margin-top:16px; font-size:0.88rem; }
+  .resultado{ margin-top:18px; padding:16px; background:#eef7f0; border:1px solid #cfe8d7; border-radius:8px; display:none; }
+  .resultado .valor{ font-size:1.4rem; font-weight:700; color:var(--verde-oscuro); }
+  .nota-metodo{ font-size:0.78rem; color:#666; margin-top:6px; }
+  .nota-pdf{ font-size:0.78rem; color:#777; margin-top:10px; }
+  .cita{ font-size:0.75rem; color:#777; border-top:1px solid #eee; padding-top:10px; margin-top:16px; }
+  .registro-tabla{ width:100%; border-collapse:collapse; margin-top:10px; }
+  .registro-tabla th, .registro-tabla td{ border:1px solid #ddd; padding:6px 8px; font-size:0.85rem; text-align:center; }
+  .registro-tabla th{ background:#f0f0f0; }
+  footer{ text-align:center; font-size:0.78rem; color:#777; padding:26px 20px 20px; max-width:820px; margin:12px auto 0; }
+  .footer-contacto{ display:flex; justify-content:center; align-items:center; gap:22px; flex-wrap:wrap; margin-bottom:12px; }
+  .footer-contacto a{ display:inline-flex; align-items:center; gap:6px; color:var(--verde-oscuro); text-decoration:none; font-size:0.85rem; font-weight:600; }
+  .footer-contacto a:hover{ text-decoration:underline; }
+  .footer-contacto svg{ width:16px; height:16px; fill:var(--verde); flex-shrink:0; }
+  .footer-linea{ margin:4px 0; }
+  .footer-licencia{ margin:6px 0 0; font-size:0.72rem; color:#999; }
+  .footer-licencia a{ color:#999; }
+  .fila-checklist{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:24px; }
+  .checklist-titulo{ font-weight:700; color:var(--verde-oscuro); margin:0 0 6px; }
+  ul.checklist{ margin:0; padding-left:20px; font-size:0.88rem; line-height:1.5; }
+  ul.checklist li{ margin-bottom:6px; }
+
+  .protocolo-fab{
+    position:fixed; bottom:22px; right:22px; z-index:1000;
+    background:var(--verde); color:#fff; border:none; border-radius:50px;
+    padding:12px 18px; font-size:0.88rem; font-weight:600; cursor:pointer;
+    box-shadow:0 4px 14px rgba(0,0,0,0.28); display:flex; align-items:center; gap:8px;
+  }
+  .protocolo-fab:hover{ background:var(--verde-oscuro); }
+  .protocolo-fab svg{ width:18px; height:18px; fill:#fff; flex-shrink:0; }
+  .protocolo-panel{
+    position:fixed; bottom:80px; right:22px; z-index:1000;
+    width:360px; max-width:calc(100vw - 32px); max-height:70vh; overflow-y:auto;
+    background:#fff; border:1px solid var(--gris-borde); border-radius:12px;
+    box-shadow:0 10px 32px rgba(0,0,0,0.22); padding:20px 22px;
+    display:none;
+  }
+  .protocolo-panel.abierto{ display:block; }
+  .protocolo-panel h3{ margin:0 0 2px; color:var(--verde-oscuro); font-size:1.02rem; padding-right:26px; }
+  .protocolo-panel .subt{ margin:0; font-size:0.78rem; color:#777; font-style:italic; }
+  .protocolo-panel .cerrar{
+    position:absolute; top:12px; right:14px; background:none; border:none; font-size:1.5rem;
+    line-height:1; color:#888; cursor:pointer; padding:0;
+  }
+  .protocolo-panel .cerrar:hover{ color:#222; }
+  .protocolo-lista{ margin:12px 0 0; padding-left:20px; font-size:0.85rem; line-height:1.5; }
+  .protocolo-lista li{ margin-bottom:9px; }
+  .protocolo-nota{ font-size:0.74rem; color:#666; border-top:1px solid #eee; margin-top:12px; padding-top:10px; line-height:1.5; }
+  @media (max-width:480px){
+    .protocolo-fab span{ display:none; }
+    .protocolo-fab{ padding:14px; border-radius:50%; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <img class="logo-personal" src="mi-logo.png" alt="Daniel Salcedo — Medicina del Deporte y la Actividad Física" onerror="this.style.display='none'">
+  <div class="titulos">
+    <h1>Medicina del Deporte y la Actividad Física</h1>
+    <p>Universidad de Antioquia</p>
+    <div class="header-contacto">
+      <a href="https://www.instagram.com/daniel.sportsmed" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c2.717 0 3.056.01 4.122.06 1.065.05 1.79.217 2.428.465.66.256 1.216.598 1.772 1.153a4.908 4.908 0 0 1 1.153 1.772c.247.637.415 1.363.465 2.428.047 1.066.06 1.405.06 4.122 0 2.717-.01 3.056-.06 4.122-.05 1.065-.218 1.79-.465 2.428a4.883 4.883 0 0 1-1.153 1.772 4.915 4.915 0 0 1-1.772 1.153c-.637.247-1.363.415-2.428.465-1.066.047-1.405.06-4.122.06-2.717 0-3.056-.01-4.122-.06-1.065-.05-1.79-.218-2.428-.465a4.89 4.89 0 0 1-1.772-1.153 4.904 4.904 0 0 1-1.153-1.772c-.248-.637-.415-1.363-.465-2.428C2.013 15.056 2 14.717 2 12c0-2.717.01-3.056.06-4.122.05-1.066.217-1.79.465-2.428a4.88 4.88 0 0 1 1.153-1.772A4.897 4.897 0 0 1 5.45 2.525c.638-.248 1.362-.415 2.428-.465C8.944 2.013 9.283 2 12 2zm0 1.802c-2.67 0-2.987.01-4.04.059-.976.045-1.505.207-1.858.344-.466.181-.8.398-1.15.748-.35.35-.566.683-.747 1.15-.137.352-.3.881-.344 1.857-.048 1.053-.059 1.37-.059 4.04 0 2.67.01 2.987.059 4.04.045.976.207 1.505.344 1.858.181.466.397.8.747 1.15.35.35.684.566 1.15.747.353.137.882.3 1.858.344 1.053.049 1.37.06 4.04.06 2.67 0 2.987-.011 4.04-.06.976-.045 1.505-.207 1.858-.344.466-.181.8-.398 1.15-.748.35-.35.566-.683.747-1.15.137-.352.3-.881.344-1.857.048-1.053.059-1.37.059-4.04 0-2.67-.01-2.987-.059-4.04-.045-.976-.207-1.505-.344-1.858a3.098 3.098 0 0 0-.747-1.15 3.11 3.11 0 0 0-1.15-.747c-.353-.137-.882-.3-1.858-.344-1.053-.048-1.37-.059-4.04-.059zM12 7.135A4.865 4.865 0 1 1 12 16.865 4.865 4.865 0 0 1 12 7.135zm0 1.802a3.063 3.063 0 1 0 0 6.126 3.063 3.063 0 0 0 0-6.126zm5.338-1.505a1.137 1.137 0 1 1-2.274 0 1.137 1.137 0 0 1 2.274 0z"/></svg>
+        @daniel.sportsmed
+      </a>
+      <a href="mailto:dr.danielsalcedop@gmail.com">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4h20v16H2V4zm2 2.24V18h16V6.24l-7.4 6.47a1 1 0 0 1-1.2 0L4 6.24zm.86-.24L12 12.5 19.14 6H4.86z"/></svg>
+        dr.danielsalcedop@gmail.com
+      </a>
+      <a href="tel:+573057320846">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.01-.24 11.36 11.36 0 0 0 3.58.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1 11.36 11.36 0 0 0 .57 3.58 1 1 0 0 1-.25 1.01l-2.2 2.2z"/></svg>
+        +57 305 732 0846
+      </a>
+    </div>
+  </div>
+  <a class="volver" href="index.html">&larr; Volver al catálogo</a>
+</header>
+
+<main>
+  <h1 class="titulo-pagina">Test de caminata de 1 milla</h1>
+  <p class="subtitulo-pagina">Rockport Walk Test — Kline y cols. (1987)</p>
+
+  <!-- ===================== 1. LISTA DE CHEQUEO ===================== -->
+  <section class="bloque">
+    <h2>1. Lista de chequeo — material y preparación</h2>
+    <div class="fila-checklist">
+      <div>
+        <p class="checklist-titulo">Para el examinador</p>
+        <ul class="checklist">
+          <li>Superficie plana y medida de 1 milla (1609 m): pista atlética de 400 m (4 vueltas + 9 m) o ruta medida con GPS/rueda de medición.</li>
+          <li>Cronómetro.</li>
+          <li>Pulsómetro, o método confiable para palpación manual del pulso.</li>
+          <li>Báscula y tallímetro (si no se cuenta con datos previos).</li>
+          <li>Tensiómetro.</li>
+          <li>Este formulario a mano (computador, tablet o celular) para diligenciar y descargar los PDF.</li>
+          <li>Plan de respuesta ante evento adverso y datos de contacto de emergencia.</li>
+        </ul>
+      </div>
+      <div>
+        <p class="checklist-titulo">Para el paciente/participante</p>
+        <ul class="checklist">
+          <li>Ropa y calzado cómodos para caminar a paso rápido.</li>
+          <li>Evitar comida copiosa, exceso de cafeína o ejercicio intenso en las horas previas a la prueba.</li>
+          <li>Hidratación adecuada antes de iniciar.</li>
+          <li>Informar antecedentes médicos relevantes antes de comenzar.</li>
+          <li>No presentar signos de alarma el día de la prueba (fiebre, dolor torácico, mareo, lesión aguda, etc. — ver PAR-Q).</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 2. DATOS Y VALORACIÓN PRE-TEST ===================== -->
+  <section class="bloque">
+    <h2>2. Valoración pre-test</h2>
+    <div class="fila">
+      <div><label>Fecha</label><input type="text" id="fecha"></div>
+      <div><label>Hora</label><input type="text" id="hora"></div>
+      <div><label>Examinador</label><input type="text" id="examinador"></div>
+    </div>
+
+    <label>Nombre del participante</label>
+    <input type="text" id="nombre">
+
+    <div class="fila">
+      <div><label>Edad (años)</label><input type="number" id="edad" min="0"></div>
+      <div><label>Documento de identidad</label><input type="text" id="id"></div>
+      <div><label>Sexo</label>
+        <select id="sexo">
+          <option value="">Seleccione</option>
+          <option value="1">Hombre</option>
+          <option value="0">Mujer</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fila">
+      <div><label>Enfermedades</label><input type="text" id="enfermedades"></div>
+      <div><label>Medicamentos</label><input type="text" id="medicamentos"></div>
+    </div>
+    <div class="fila">
+      <div><label>Cirugías</label><input type="text" id="cirugias"></div>
+      <div><label>Lesiones osteomusculares</label><input type="text" id="lesiones"></div>
+    </div>
+    <label>Alergias</label>
+    <input type="text" id="alergias">
+
+    <div class="fila">
+      <div><label>Peso (kg)</label><input type="number" step="0.1" id="peso" oninput="actualizarPesoLb()"></div>
+      <div><label>Peso (lb) — calculado automáticamente</label><input type="text" id="pesoLb" disabled></div>
+      <div><label>Talla (cm)</label><input type="number" id="talla"></div>
+    </div>
+    <div class="fila">
+      <div><label>FC de reposo (lpm)</label><input type="number" id="fcReposo"></div>
+      <div><label>TA de reposo (mmHg)</label><input type="text" id="taReposo"></div>
+      <div><label>FC máxima calculada¹ (220 − edad)</label><input type="text" id="fcMax" disabled></div>
+    </div>
+  </section>
+
+  <!-- ===================== 2. PAR-Q ===================== -->
+  <section class="bloque">
+    <h2>3. PAR-Q</h2>
+    <div id="parqLista"></div>
+    <div id="avisoParq">⚠ Se marcó "Sí" en al menos una pregunta del PAR-Q. Se recomienda evaluación médica adicional antes de realizar la prueba.</div>
+  </section>
+
+  <!-- ===================== 3. CONSENTIMIENTO INFORMADO ===================== -->
+  <section class="bloque">
+    <h2>4. Consentimiento informado</h2>
+    <div class="texto-consentimiento">
+      <p>Yo, el/la participante identificado/a arriba, he sido informado/a sobre la naturaleza, los objetivos, los beneficios y los riesgos del test de caminata de 1 milla, que se me propone realizar como parte de una evaluación de mi condición física.</p>
+      <p><strong>Se me ha explicado que:</strong></p>
+      <ul>
+        <li>Es una prueba submáxima de capacidad aeróbica que consiste en caminar 1 milla (1609 metros) en una superficie plana y medida, lo más rápido posible, sin trotar ni correr.</li>
+        <li>Al finalizar se registrarán mi tiempo y mi frecuencia cardíaca, con los cuales se estimará mi consumo máximo de oxígeno (VO₂máx) mediante una ecuación validada (Kline y cols., 1987).</li>
+        <li>La prueba se detiene si ya no puedo continuar, por decisión personal o ante cualquier situación de riesgo para mi salud o integridad.</li>
+      </ul>
+      <p><strong>También se me ha informado que:</strong></p>
+      <ul>
+        <li>Los posibles riesgos incluyen fatiga, mareo, molestias musculares, dificultad respiratoria y, en casos excepcionales, eventos cardiovasculares.</li>
+        <li>Si presento alguna molestia o síntoma inusual, debo detenerme y comunicarlo de inmediato.</li>
+        <li>No debo realizar la prueba si estoy lesionado/a, enfermo/a, con fiebre, dolor torácico, asma no controlada, hipertensión no controlada, u otra condición médica que me impida realizar esfuerzo físico moderado-intenso.</li>
+      </ul>
+      <p>Declaro que he leído y comprendido la información anterior, que he tenido la oportunidad de hacer preguntas y que estas me han sido respondidas satisfactoriamente. Tras ello, participo de forma voluntaria y autorizo la realización de la prueba en las condiciones descritas.</p>
+    </div>
+
+    <div class="checkbox-consent">
+      <input type="checkbox" id="aceptoConsent">
+      <label for="aceptoConsent" style="margin:0; font-weight:400;">He leído y comprendido la información anterior y participo de forma voluntaria.</label>
+    </div>
+
+    <div class="firma-wrap">
+      <label>Firma del participante (dibuje con el mouse o el dedo)</label>
+      <canvas id="firmaCanvas"></canvas>
+      <div class="firma-botones">
+        <button type="button" class="secundario" onclick="limpiarFirma()">Limpiar firma</button>
+      </div>
+    </div>
+
+    <label style="margin-top:16px;">Nombre del evaluador/responsable</label>
+    <input type="text" id="nombreEvaluador">
+
+    <div style="margin-top:18px;">
+      <button type="button" onclick="descargarConsentimiento()">Descargar consentimiento informado (PDF)</button>
+      <div class="nota-pdf">El logo y la firma solo se incrustan correctamente en el PDF cuando la página está publicada en GitHub Pages (no al abrir el archivo directamente en su computador).</div>
+    </div>
+  </section>
+
+  <!-- ===================== 4. HOJA DE REGISTRO ===================== -->
+  <section class="bloque">
+    <h2>5. Hoja de registro del test</h2>
+    <div class="nota-metodo" style="margin-top:0;">Se registran únicamente las variables descritas en el artículo original: Kline GM, Porcari JP, Hintermeister R, Freedson PS, Ward A, McCarron RF, Ross J, Rippe JM. Estimation of VO<sub>2</sub>max from a one-mile track walk, gender, age, and body weight. <em>Med Sci Sports Exerc.</em> 1987;19(3):253-9.</div>
+
+    <div class="fila" style="margin-top:14px;">
+      <div><label>Tiempo total T1 (min)</label><input type="number" id="t1min" min="0"></div>
+      <div><label>Tiempo total T1 (seg adicionales)</label><input type="number" id="t1seg" min="0" max="59"></div>
+      <div><label>FC último cuarto de milla (HR1-4, lpm)</label><input type="number" id="hr14"></div>
+    </div>
+    <div class="nota-metodo">Según el artículo: T1 es el tiempo total transcurrido en caminar la milla completa; HR1-4 es el promedio de las dos últimas lecturas de frecuencia cardíaca de 1 minuto (monitoreo continuo) al llegar al último cuarto de milla. Si en campo se toma una sola lectura puntual al finalizar, regístrelo como una aproximación práctica a este método, no como el procedimiento exacto del artículo.</div>
+
+    <button type="button" style="margin-top:16px;" onclick="calcularVO2()">Calcular VO₂máx</button>
+
+    <div class="resultado" id="resultadoBox">
+      <p>VO₂máx: <span class="valor" id="valorLmin">—</span> L/min</p>
+      <p>VO₂máx relativo: <span class="valor" id="valorRelativo">—</span> ml·kg⁻¹·min⁻¹</p>
+      <p class="nota-metodo">Error estándar de estimación (SEE) reportado en el artículo original: ±0,325 L/min. Ecuación generalizada, r = 0,93 (Kline y cols., 1987).</p>
+    </div>
+
+    <div class="fila" style="margin-top:18px;">
+      <div><label>FC de recuperación (lpm)</label><input type="number" id="fcRecuperacion"></div>
+      <div><label>TA de recuperación (mmHg)</label><input type="text" id="taRecuperacion"></div>
+    </div>
+    <label>Síntomas</label>
+    <input type="text" id="sintomas">
+
+    <div style="margin-top:18px;">
+      <button type="button" onclick="descargarReporte()">Descargar reporte del test (PDF)</button>
+    </div>
+
+    <div class="cita">
+      ¹ Fox SM 3rd, Naughton JP, Haskell WL. Physical activity and the prevention of coronary heart disease. Ann Clin Res. 1971 Dec;3(6):404-32. PMID: 4945367.<br>
+      ² Kline GM, Porcari JP, Hintermeister R, Freedson PS, Ward A, McCarron RF, Ross J, Rippe JM. Estimation of VO2max from a one-mile track walk, gender, age, and body weight. Med Sci Sports Exerc. 1987;19(3):253-9.
+    </div>
+  </section>
+</main>
+
+<button type="button" class="protocolo-fab" id="protocoloFab" onclick="toggleProtocolo()" aria-expanded="false" aria-controls="protocoloPanel">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 2a1 1 0 0 0-1 1v1H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V3a1 1 0 0 0-1-1H9zm0 2h6v2H9V4zM6 6h2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1h2v14H6V6zm2.5 4.5 1.5 1.5 3.5-3.5 1.4 1.4L10 15.3l-2.9-2.9 1.4-1.4z"/></svg>
+  <span>Protocolo</span>
+</button>
+
+<div class="protocolo-panel" id="protocoloPanel">
+  <button type="button" class="cerrar" onclick="toggleProtocolo()" aria-label="Cerrar">&times;</button>
+  <h3>Protocolo paso a paso</h3>
+  <p class="subt">Test de caminata de 1 milla (Rockport Walk Test)</p>
+  <ol class="protocolo-lista">
+    <li>Diligenciar la valoración pre-test y el PAR-Q. Ante cualquier respuesta positiva o signo de alarma, evaluar contraindicación antes de continuar.</li>
+    <li>Explicar la prueba y firmar el consentimiento informado.</li>
+    <li>Tomar medidas basales: peso, talla, FC y TA en reposo.</li>
+    <li>Explicar la consigna: caminar la milla lo más rápido posible, sin trotar ni correr, manteniendo el esfuerzo sostenido durante todo el recorrido.</li>
+    <li>Iniciar el cronómetro en el momento en que el participante comienza a caminar.</li>
+    <li>Si se cuenta con monitoreo continuo de FC, registrarla al llegar a cada cuarto de milla (opcional; ver nota).</li>
+    <li>Al completar la milla, detener el cronómetro (T1) y registrar de inmediato la frecuencia cardíaca del último cuarto de milla (HR1-4).</li>
+    <li>Realizar la evaluación posterior: FC y TA de recuperación, e indagar síntomas.</li>
+    <li>Calcular el VO₂máx con la ecuación de Kline y cols. (1987), usando peso, edad, sexo, T1 y HR1-4.</li>
+    <li>Registrar el resultado y descargar/archivar los PDF de esta proforma.</li>
+  </ol>
+  <p class="protocolo-nota">HR1-4 = promedio de las dos últimas lecturas de FC de 1 min (monitoreo continuo) al llegar al último cuarto de milla. Una sola lectura puntual al finalizar es una aproximación práctica, no el procedimiento exacto del artículo original.<br>Kline GM, Porcari JP, Hintermeister R, Freedson PS, Ward A, McCarron RF, Ross J, Rippe JM. <em>Med Sci Sports Exerc.</em> 1987;19(3):253-9.</p>
+</div>
+
+<footer>
+  <div class="footer-contacto">
+    <a href="https://www.instagram.com/daniel.sportsmed" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c2.717 0 3.056.01 4.122.06 1.065.05 1.79.217 2.428.465.66.256 1.216.598 1.772 1.153a4.908 4.908 0 0 1 1.153 1.772c.247.637.415 1.363.465 2.428.047 1.066.06 1.405.06 4.122 0 2.717-.01 3.056-.06 4.122-.05 1.065-.218 1.79-.465 2.428a4.883 4.883 0 0 1-1.153 1.772 4.915 4.915 0 0 1-1.772 1.153c-.637.247-1.363.415-2.428.465-1.066.047-1.405.06-4.122.06-2.717 0-3.056-.01-4.122-.06-1.065-.05-1.79-.218-2.428-.465a4.89 4.89 0 0 1-1.772-1.153 4.904 4.904 0 0 1-1.153-1.772c-.248-.637-.415-1.363-.465-2.428C2.013 15.056 2 14.717 2 12c0-2.717.01-3.056.06-4.122.05-1.066.217-1.79.465-2.428a4.88 4.88 0 0 1 1.153-1.772A4.897 4.897 0 0 1 5.45 2.525c.638-.248 1.362-.415 2.428-.465C8.944 2.013 9.283 2 12 2zm0 1.802c-2.67 0-2.987.01-4.04.059-.976.045-1.505.207-1.858.344-.466.181-.8.398-1.15.748-.35.35-.566.683-.747 1.15-.137.352-.3.881-.344 1.857-.048 1.053-.059 1.37-.059 4.04 0 2.67.01 2.987.059 4.04.045.976.207 1.505.344 1.858.181.466.397.8.747 1.15.35.35.684.566 1.15.747.353.137.882.3 1.858.344 1.053.049 1.37.06 4.04.06 2.67 0 2.987-.011 4.04-.06.976-.045 1.505-.207 1.858-.344.466-.181.8-.398 1.15-.748.35-.35.566-.683.747-1.15.137-.352.3-.881.344-1.857.048-1.053.059-1.37.059-4.04 0-2.67-.01-2.987-.059-4.04-.045-.976-.207-1.505-.344-1.858a3.098 3.098 0 0 0-.747-1.15 3.11 3.11 0 0 0-1.15-.747c-.353-.137-.882-.3-1.858-.344-1.053-.048-1.37-.059-4.04-.059zM12 7.135A4.865 4.865 0 1 1 12 16.865 4.865 4.865 0 0 1 12 7.135zm0 1.802a3.063 3.063 0 1 0 0 6.126 3.063 3.063 0 0 0 0-6.126zm5.338-1.505a1.137 1.137 0 1 1-2.274 0 1.137 1.137 0 0 1 2.274 0z"/></svg>
+      @daniel.sportsmed
+    </a>
+    <a href="mailto:dr.danielsalcedop@gmail.com">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4h20v16H2V4zm2 2.24V18h16V6.24l-7.4 6.47a1 1 0 0 1-1.2 0L4 6.24zm.86-.24L12 12.5 19.14 6H4.86z"/></svg>
+      dr.danielsalcedop@gmail.com
+    </a>
+    <a href="tel:+573057320846">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.01-.24 11.36 11.36 0 0 0 3.58.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1 11.36 11.36 0 0 0 .57 3.58 1 1 0 0 1-.25 1.01l-2.2 2.2z"/></svg>
+      +57 305 732 0846
+    </a>
+  </div>
+  <p class="footer-linea">Universidad de Antioquia · Medicina del Deporte y la Actividad Física</p>
+  <p class="footer-licencia">© 2026 Daniel Salcedo P. · Contenido y código bajo licencia <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es" target="_blank" rel="noopener">Creative Commons BY-NC-SA 4.0</a></p>
+</footer>
+
+<script>
+// ---------- Protocolo flotante ----------
+function toggleProtocolo() {
+  const panel = document.getElementById("protocoloPanel");
+  const abierto = panel.classList.toggle("abierto");
+  document.getElementById("protocoloFab").setAttribute("aria-expanded", abierto ? "true" : "false");
+}
+document.addEventListener("click", (e) => {
+  const panel = document.getElementById("protocoloPanel");
+  const fab = document.getElementById("protocoloFab");
+  if (panel.classList.contains("abierto") && !panel.contains(e.target) && !fab.contains(e.target)) {
+    panel.classList.remove("abierto");
+    fab.setAttribute("aria-expanded", "false");
+  }
+});
+
+// ---------- PAR-Q ----------
+const preguntasParq = [
+  "¿Alguna vez su médico le ha comunicado que tiene problemas cardíacos o hipertensión arterial?",
+  "¿Siente usted dolor en el pecho en reposo, durante las actividades de la vida diaria o cuando realiza actividad física?",
+  "¿Tiene usted problemas de equilibrio debido a mareos o ha sufrido pérdida de consciencia en los últimos 12 meses? (Responda NO si el mareo fue por hiperventilación, incluso durante ejercicio vigoroso.)",
+  "¿Alguna vez le diagnosticaron otra enfermedad crónica (sin ser enfermedad cardíaca o hipertensión arterial)? Precise cuál.",
+  "¿Está tomando actualmente medicación para alguna enfermedad crónica? Detalle la enfermedad y la medicación.",
+  "¿Sufre actualmente (o ha sufrido en los últimos 12 meses) alguna lesión ósea, articular o de tejidos blandos que empeoraría al ser físicamente más activo? (Responda NO si el problema no limita su capacidad actual.) Precise cuál.",
+  "¿Alguna vez su médico le ha dicho que solo debe realizar actividad física bajo supervisión médica?",
+];
+
+const parqLista = document.getElementById("parqLista");
+preguntasParq.forEach((texto, i) => {
+  const div = document.createElement("div");
+  div.className = "parq-item";
+  div.innerHTML = `
+    <p>${i + 1}) ${texto}</p>
+    <div class="parq-opciones">
+      <label><input type="radio" name="parq${i}" value="si" onchange="revisarParq()"> Sí</label>
+      <label><input type="radio" name="parq${i}" value="no" onchange="revisarParq()"> No</label>
+    </div>`;
+  parqLista.appendChild(div);
+});
+
+function revisarParq() {
+  let algunSi = false;
+  for (let i = 0; i < preguntasParq.length; i++) {
+    const marcado = document.querySelector(`input[name="parq${i}"]:checked`);
+    if (marcado && marcado.value === "si") algunSi = true;
+  }
+  document.getElementById("avisoParq").style.display = algunSi ? "block" : "none";
+}
+
+function respuestasParq() {
+  return preguntasParq.map((texto, i) => {
+    const marcado = document.querySelector(`input[name="parq${i}"]:checked`);
+    return { texto, respuesta: marcado ? (marcado.value === "si" ? "Sí" : "No") : "(sin responder)" };
+  });
+}
+
+// ---------- Peso / FC máxima ----------
+function actualizarPesoLb() {
+  const kg = parseFloat(document.getElementById("peso").value);
+  document.getElementById("pesoLb").value = isFinite(kg) ? (kg * 2.2046).toFixed(1) : "";
+}
+document.getElementById("edad").addEventListener("input", () => {
+  const edad = parseFloat(document.getElementById("edad").value);
+  document.getElementById("fcMax").value = isFinite(edad) ? (220 - edad).toFixed(0) : "";
+});
+
+// ---------- Firma digital (canvas) ----------
+const canvas = document.getElementById("firmaCanvas");
+const ctx = canvas.getContext("2d");
+function ajustarCanvas() {
+  // Preserva el trazo existente: redimensionar el canvas (cambiar width/height)
+  // borra su contenido, así que lo guardamos antes y lo volvemos a dibujar después.
+  const previa = (canvas.width && canvas.height && !firmaEstaVaciaSinGuardia()) ? canvas.toDataURL() : null;
+  const ratio = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * ratio;
+  canvas.height = rect.height * ratio;
+  ctx.scale(ratio, ratio);
+  ctx.lineWidth = 2;
+  ctx.lineCap = "round";
+  ctx.strokeStyle = "#111";
+  if (previa) {
+    const img = new Image();
+    img.onload = () => ctx.drawImage(img, 0, 0, rect.width, rect.height);
+    img.src = previa;
+  }
+}
+function firmaEstaVaciaSinGuardia() {
+  // Igual que firmaEstaVacia(), pero sin depender de que ajustarCanvas ya se haya ejecutado.
+  const blanco = document.createElement("canvas");
+  blanco.width = canvas.width; blanco.height = canvas.height;
+  return canvas.toDataURL() === blanco.toDataURL();
+}
+window.addEventListener("resize", ajustarCanvas);
+ajustarCanvas();
+
+let dibujando = false;
+function posicion(e) {
+  const rect = canvas.getBoundingClientRect();
+  const punto = e.touches ? e.touches[0] : e;
+  return { x: punto.clientX - rect.left, y: punto.clientY - rect.top };
+}
+function iniciar(e) { dibujando = true; const p = posicion(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); e.preventDefault(); }
+function mover(e) { if (!dibujando) return; const p = posicion(e); ctx.lineTo(p.x, p.y); ctx.stroke(); e.preventDefault(); }
+function terminar() { dibujando = false; }
+canvas.addEventListener("mousedown", iniciar);
+canvas.addEventListener("mousemove", mover);
+window.addEventListener("mouseup", terminar);
+canvas.addEventListener("touchstart", iniciar, { passive: false });
+canvas.addEventListener("touchmove", mover, { passive: false });
+canvas.addEventListener("touchend", terminar);
+
+function limpiarFirma() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+function firmaEstaVacia() {
+  const blanco = document.createElement("canvas");
+  blanco.width = canvas.width; blanco.height = canvas.height;
+  return canvas.toDataURL() === blanco.toDataURL();
+}
+
+// ---------- Cálculo VO2max (Kline et al., 1987) ----------
+function calcularVO2() {
+  const pesoKg = parseFloat(document.getElementById("peso").value);
+  const pesoLb = pesoKg * 2.2046;
+  const edad = parseFloat(document.getElementById("edad").value);
+  const sexo = parseFloat(document.getElementById("sexo").value);
+  const t1min = parseFloat(document.getElementById("t1min").value) || 0;
+  const t1seg = parseFloat(document.getElementById("t1seg").value) || 0;
+  const t1 = t1min + t1seg / 60;
+  const hr14 = parseFloat(document.getElementById("hr14").value);
+
+  if (![pesoKg, edad, t1, hr14].every(isFinite) || isNaN(sexo)) {
+    alert("Complete peso, edad, sexo, tiempo T1 y FC del último cuarto de milla antes de calcular.");
+    return;
+  }
+
+  const vo2Lmin = 6.9652 + (0.0091 * pesoLb) - (0.0257 * edad) + (0.5955 * sexo) - (0.2240 * t1) - (0.0115 * hr14);
+  const vo2Relativo = (vo2Lmin * 1000) / pesoKg;
+
+  document.getElementById("valorLmin").textContent = vo2Lmin.toFixed(2);
+  document.getElementById("valorRelativo").textContent = vo2Relativo.toFixed(1);
+  document.getElementById("resultadoBox").style.display = "block";
+}
+
+// ---------- Utilidad: cargar imagen local como dataURL para el PDF ----------
+async function cargarImagenComoDataURL(ruta) {
+  try {
+    const res = await fetch(ruta);
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return await new Promise((resolve) => {
+      const lector = new FileReader();
+      lector.onloadend = () => resolve(lector.result);
+      lector.readAsDataURL(blob);
+    });
+  } catch (e) {
+    return null;
+  }
+}
+
+// ---------- Paleta de color (misma que la página) ----------
+const PDF_VERDE = [15, 92, 51];
+const PDF_VERDE_OSCURO = [10, 61, 34];
+const PDF_VERDE_CLARO = [235, 246, 239];
+const PDF_BORDE_CLARO = [201, 229, 211];
+const PDF_GRIS = [110, 110, 110];
+const MARGEN_X = 15;
+const ANCHO_UTIL = 180; // 210mm A4 - 2*15mm
+
+async function encabezadoPDF(doc, tituloDocumento) {
+  const logoPersonal = await cargarImagenComoDataURL("mi-logo.png");
+  let y = 14;
+  if (logoPersonal) {
+    // Aspecto real del logo (~500x296) para no deformar el texto que contiene.
+    const anchoLogo = 58, altoLogo = anchoLogo * (296 / 500);
+    doc.addImage(logoPersonal, "PNG", MARGEN_X, y, anchoLogo, altoLogo);
+  }
+  doc.setTextColor(...PDF_VERDE_OSCURO);
+  doc.setFontSize(10.5);
+  doc.setFont(undefined, "bold");
+  doc.text("Dr. Daniel Salcedo P.", 195, y + 6, { align: "right" });
+  doc.setFont(undefined, "normal");
+  doc.setFontSize(8.7);
+  doc.setTextColor(...PDF_GRIS);
+  doc.text("Medicina del Deporte y la Actividad Física", 195, y + 11.5, { align: "right" });
+  doc.text("Universidad de Antioquia", 195, y + 16.5, { align: "right" });
+  doc.text("RM 1012383458", 195, y + 21.5, { align: "right" });
+  y += 34;
+
+  doc.setFillColor(...PDF_VERDE);
+  doc.roundedRect(MARGEN_X, y, ANCHO_UTIL, 10, 1.5, 1.5, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(11.5);
+  doc.setFont(undefined, "bold");
+  doc.text(tituloDocumento, 105, y + 6.8, { align: "center" });
+  doc.setFont(undefined, "normal");
+  doc.setTextColor(0, 0, 0);
+  return y + 16;
+}
+
+function tituloSeccionPDF(doc, texto, y) {
+  doc.setFillColor(...PDF_VERDE);
+  doc.roundedRect(MARGEN_X, y, ANCHO_UTIL, 6.2, 1, 1, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(9.5);
+  doc.setFont(undefined, "bold");
+  doc.text(texto, MARGEN_X + 3, y + 4.4);
+  doc.setFont(undefined, "normal");
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(9.5);
+  return y + 9.5;
+}
+
+// Imprime pares [etiqueta, valor] en una cuadrícula de 2 columnas para ahorrar espacio vertical.
+// Un par con etiqueta vacía ("") se omite (se usa solo para completar la cuadrícula).
+function camposEnCuadricula(doc, pares, y) {
+  const colAncho = ANCHO_UTIL / 2;
+  const alturaFila = 5.6;
+  doc.setFontSize(9.2);
+  pares.forEach((par, i) => {
+    if (!par[0]) return;
+    const col = i % 2;
+    const fila = Math.floor(i / 2);
+    const x = MARGEN_X + col * colAncho;
+    const filaY = y + fila * alturaFila;
+    doc.setFont(undefined, "bold");
+    const etiqueta = par[0] + ":";
+    doc.text(etiqueta, x, filaY);
+    const anchoEtiqueta = doc.getTextWidth(etiqueta);
+    doc.setFont(undefined, "normal");
+    doc.text(String(par[1] || "-"), x + anchoEtiqueta + 1.8, filaY);
+  });
+  const filas = Math.ceil(pares.length / 2);
+  return y + filas * alturaFila + 3;
+}
+
+// jsPDF helper: wrap text and return the new Y position
+function escribirParrafo(doc, texto, x, y, maxAncho, alturaLinea) {
+  const lineas = doc.splitTextToSize(texto, maxAncho);
+  doc.text(lineas, x, y);
+  return y + lineas.length * alturaLinea;
+}
+
+// ---------- PDF: Consentimiento informado ----------
+async function descargarConsentimiento() {
+  if (!document.getElementById("aceptoConsent").checked) {
+    alert('Marque la casilla "He leído y comprendido..." antes de descargar el consentimiento.');
+    return;
+  }
+  if (firmaEstaVacia()) {
+    alert("Falta la firma del participante.");
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  let y = await encabezadoPDF(doc, "Consentimiento informado — Test de caminata de 1 milla");
+
+  const nombre = document.getElementById("nombre").value || "____________________";
+  const idParticipante = document.getElementById("id").value || "____________________";
+  const fecha = document.getElementById("fecha").value || new Date().toLocaleDateString();
+
+  doc.setFontSize(9.8);
+  const parrafo1 = `Yo, ${nombre}, con documento N.o ${idParticipante}, he sido informado/a sobre la naturaleza, los objetivos, los beneficios y los riesgos del test de caminata de 1 milla, que se me propone realizar como parte de una evaluacion de mi condicion fisica.`;
+  y = escribirParrafo(doc, parrafo1, MARGEN_X, y, ANCHO_UTIL, 4.6) + 4;
+
+  doc.setTextColor(...PDF_VERDE_OSCURO);
+  doc.setFont(undefined, "bold"); doc.text("Se me ha explicado que:", MARGEN_X, y); doc.setFont(undefined, "normal"); doc.setTextColor(0, 0, 0); y += 5.5;
+  const puntos1 = [
+    "Es una prueba submaxima de capacidad aerobica que consiste en caminar 1 milla (1609 metros) en una superficie plana y medida, lo mas rapido posible, sin trotar ni correr.",
+    "Al finalizar se registraran mi tiempo y mi frecuencia cardiaca, con los cuales se estimara mi consumo maximo de oxigeno (VO2max) mediante una ecuacion validada (Kline y cols., 1987).",
+    "La prueba se detiene si ya no puedo continuar, por decision personal o ante cualquier situacion de riesgo para mi salud o integridad.",
+  ];
+  puntos1.forEach(p => { y = escribirParrafo(doc, "•  " + p, MARGEN_X + 1, y, ANCHO_UTIL - 1, 4.6) + 1.5; });
+
+  y += 2;
+  doc.setTextColor(...PDF_VERDE_OSCURO);
+  doc.setFont(undefined, "bold"); doc.text("También se me ha informado que:", MARGEN_X, y); doc.setFont(undefined, "normal"); doc.setTextColor(0, 0, 0); y += 5.5;
+  const puntos2 = [
+    "Los posibles riesgos incluyen fatiga, mareo, molestias musculares, dificultad respiratoria y, en casos excepcionales, eventos cardiovasculares.",
+    "Si presento alguna molestia o sintoma inusual, debo detenerme y comunicarlo de inmediato.",
+    "No debo realizar la prueba si estoy lesionado/a, enfermo/a, con fiebre, dolor toracico, asma no controlada, hipertension no controlada, u otra condicion medica que me impida realizar esfuerzo fisico moderado-intenso.",
+  ];
+  puntos2.forEach(p => { y = escribirParrafo(doc, "•  " + p, MARGEN_X + 1, y, ANCHO_UTIL - 1, 4.6) + 1.5; });
+
+  y += 3;
+  doc.setFillColor(...PDF_VERDE_CLARO);
+  doc.setDrawColor(...PDF_BORDE_CLARO);
+  const declaracion = "Declaro que he leido y comprendido la informacion anterior, que he tenido la oportunidad de hacer preguntas y que estas me han sido respondidas satisfactoriamente. Tras ello, participo de forma voluntaria y autorizo la realizacion de la prueba en las condiciones descritas.";
+  const lineasDecl = doc.splitTextToSize(declaracion, ANCHO_UTIL - 6);
+  const altoCaja = lineasDecl.length * 4.6 + 6;
+  doc.roundedRect(MARGEN_X, y, ANCHO_UTIL, altoCaja, 1.5, 1.5, "FD");
+  doc.text(lineasDecl, MARGEN_X + 3, y + 5.2);
+  y += altoCaja + 8;
+
+  doc.setFontSize(9.5);
+  doc.text(`Fecha: ${fecha}`, MARGEN_X, y); y += 6;
+
+  // Firma: se preserva la relación de aspecto real del canvas para no deformar el trazo.
+  const anchoFirma = 65;
+  const altoFirma = anchoFirma * (canvas.height / canvas.width);
+  doc.addImage(canvas.toDataURL("image/png"), "PNG", MARGEN_X, y, anchoFirma, altoFirma);
+  y += altoFirma + 4;
+  doc.setDrawColor(180, 180, 180);
+  doc.setLineWidth(0.2);
+  doc.line(MARGEN_X, y, MARGEN_X + anchoFirma, y);
+  doc.setFontSize(8.3);
+  doc.setTextColor(...PDF_GRIS);
+  doc.text("Firma del participante", MARGEN_X, y + 4.5);
+  doc.setTextColor(0, 0, 0);
+
+  const evaluador = document.getElementById("nombreEvaluador").value || "____________________";
+  y += 14;
+  doc.setFontSize(9.5);
+  doc.text(`Nombre del evaluador/responsable: ${evaluador}`, MARGEN_X, y);
+
+  doc.save("consentimiento_informado_test_milla.pdf");
+}
+
+// ---------- PDF: Reporte del test ----------
+async function descargarReporte() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  let y = await encabezadoPDF(doc, "Reporte de test — Test de caminata de 1 milla");
+
+  const val = (id) => document.getElementById(id).value || "-";
+  const sexoTexto = document.getElementById("sexo").value === "1" ? "Hombre" : (document.getElementById("sexo").value === "0" ? "Mujer" : "-");
+
+  y = tituloSeccionPDF(doc, "Datos personales", y);
+  y = camposEnCuadricula(doc, [
+    ["Nombre", val("nombre")], ["Edad", val("edad")],
+    ["ID", val("id")], ["Sexo", sexoTexto],
+    ["Fecha", val("fecha")], ["Examinador", val("examinador")],
+  ], y);
+
+  y = tituloSeccionPDF(doc, "Antecedentes", y);
+  y = camposEnCuadricula(doc, [
+    ["Enfermedades", val("enfermedades")], ["Medicamentos", val("medicamentos")],
+    ["Cirugías", val("cirugias")], ["Lesiones osteomusculares", val("lesiones")],
+    ["Alergias", val("alergias")], ["", ""],
+  ], y);
+
+  y = tituloSeccionPDF(doc, "Examen físico", y);
+  y = camposEnCuadricula(doc, [
+    ["Peso (kg)", val("peso")], ["Peso (lb)", val("pesoLb")],
+    ["Talla (cm)", val("talla")], ["FC de reposo", val("fcReposo")],
+    ["TA de reposo", val("taReposo")], ["FC máxima calculada", val("fcMax")],
+  ], y);
+
+  y = tituloSeccionPDF(doc, "PAR-Q", y);
+  const respuestas = respuestasParq();
+  const positivas = respuestas.map((r, i) => ({ ...r, n: i + 1 })).filter(r => r.respuesta === "Sí");
+  const sinResponder = respuestas.filter(r => r.respuesta === "(sin responder)").length;
+  doc.setFontSize(9.2);
+  if (positivas.length === 0 && sinResponder === 0) {
+    doc.setTextColor(...PDF_VERDE_OSCURO);
+    y = escribirParrafo(doc, "Sin alertas: las 7 preguntas del PAR-Q fueron respondidas \"No\".", MARGEN_X, y, ANCHO_UTIL, 4.6) + 2;
+    doc.setTextColor(0, 0, 0);
+  } else {
+    if (positivas.length > 0) {
+      doc.setTextColor(180, 60, 30);
+      doc.setFont(undefined, "bold");
+      y = escribirParrafo(doc, `Alerta — respuesta "Sí" en ${positivas.length} pregunta(s):`, MARGEN_X, y, ANCHO_UTIL, 4.6) + 1;
+      doc.setFont(undefined, "normal");
+      doc.setTextColor(0, 0, 0);
+      positivas.forEach(r => { y = escribirParrafo(doc, `${r.n}) ${r.texto}`, MARGEN_X + 2, y, ANCHO_UTIL - 2, 4.4) + 1; });
+      y += 1;
+    }
+    if (sinResponder > 0) {
+      y = escribirParrafo(doc, `${sinResponder} pregunta(s) del PAR-Q sin responder.`, MARGEN_X, y, ANCHO_UTIL, 4.6) + 1;
+    }
+    const negativas = 7 - positivas.length - sinResponder;
+    if (negativas > 0) {
+      y = escribirParrafo(doc, `Las ${negativas} preguntas restantes fueron respondidas "No".`, MARGEN_X, y, ANCHO_UTIL, 4.6) + 1;
+    }
+  }
+  y += 2;
+
+  y = tituloSeccionPDF(doc, "Hoja de registro", y);
+  const t1min = document.getElementById("t1min").value || "0";
+  const t1seg = document.getElementById("t1seg").value || "0";
+  y = camposEnCuadricula(doc, [
+    ["Tiempo total T1", `${t1min} min ${t1seg} seg`],
+    ["FC último cuarto de milla (HR1-4)", val("hr14")],
+  ], y);
+
+  // Caja destacada con el resultado (mismo estilo que la página web).
+  const vLmin = document.getElementById("valorLmin").textContent;
+  const vRel = document.getElementById("valorRelativo").textContent;
+  doc.setFillColor(...PDF_VERDE_CLARO);
+  doc.setDrawColor(...PDF_BORDE_CLARO);
+  doc.roundedRect(MARGEN_X, y, ANCHO_UTIL, 20, 1.5, 1.5, "FD");
+  doc.setTextColor(...PDF_VERDE_OSCURO);
+  doc.setFont(undefined, "bold");
+  doc.setFontSize(9.3);
+  doc.text("Resultado — ecuación de Kline y cols. (1987)", MARGEN_X + 3, y + 5.5);
+  doc.setFontSize(12.5);
+  doc.text(`VO2max: ${vLmin} L/min   ·   VO2max relativo: ${vRel} ml/kg/min`, MARGEN_X + 3, y + 12.5);
+  doc.setFont(undefined, "normal");
+  doc.setFontSize(7.6);
+  doc.setTextColor(...PDF_GRIS);
+  doc.text("SEE reportado en el artículo original: ±0,325 L/min. Ecuación generalizada, r = 0,93.", MARGEN_X + 3, y + 17.3);
+  doc.setTextColor(0, 0, 0);
+  y += 26;
+
+  y = tituloSeccionPDF(doc, "Evaluación posterior", y);
+  y = camposEnCuadricula(doc, [
+    ["FC de recuperación", val("fcRecuperacion")], ["TA de recuperación", val("taRecuperacion")],
+    ["Síntomas", val("sintomas")], ["", ""],
+  ], y);
+
+  doc.setFontSize(6.8);
+  doc.setTextColor(...PDF_GRIS);
+  escribirParrafo(doc, "Kline GM, Porcari JP, Hintermeister R, Freedson PS, Ward A, McCarron RF, Ross J, Rippe JM. Estimation of VO2max from a one-mile track walk, gender, age, and body weight. Med Sci Sports Exerc. 1987;19(3):253-9.", MARGEN_X, y, ANCHO_UTIL, 3.6);
+
+  doc.save("reporte_test_milla.pdf");
+}
+</script>
+</body>
+</html>
