@@ -329,7 +329,7 @@
     <div class="formula-box">
       <p class="formula-titulo">Ecuación utilizada (Kline y cols., 1987)</p>
       <p class="formula-tex"><strong>VO₂máx (L/min)</strong> <span class="op">=</span> 6.9652 + 0.0091 × Peso(lb) − 0.0257 × Edad + 0.5955 × Sexo(H=1, M=0) − 0.2240 × T1(min) − 0.0115 × HR1-4(lpm)</p>
-      <p class="formula-tex"><strong>VO₂máx relativo (ml·kg⁻¹·min⁻¹)</strong> <span class="op">=</span> VO₂máx (L/min) × 1000 ÷ Peso (kg)</p>
+      <p class="formula-tex"><strong>VO₂máx relativo (ml·kg⁻¹·min⁻¹)</strong> <span class="op">=</span> 132.853 − 0.0769 × Peso(lb) − 0.3877 × Edad + 6.3150 × Sexo(H=1, M=0) − 3.2649 × T1(min) − 0.1565 × HR1-4(lpm)</p>
     </div>
 
     <button type="button" style="margin-top:0;" onclick="calcularVO2()">Calcular VO₂máx</button>
@@ -337,7 +337,7 @@
     <div class="resultado" id="resultadoBox">
       <p>VO₂máx: <span class="valor" id="valorLmin">—</span> L/min</p>
       <p>VO₂máx relativo: <span class="valor" id="valorRelativo">—</span> ml·kg⁻¹·min⁻¹</p>
-      <p class="nota-metodo">Error estándar de estimación (SEE) reportado en el artículo original: ±0,325 L/min. Ecuación generalizada, r = 0,93 (Kline y cols., 1987).</p>
+      <p class="nota-metodo">Dos ecuaciones generalizadas independientes del artículo original (Kline y cols., 1987), no una conversión de unidades entre ambas: L/min (SEE ±0,325; r = 0,93) y ml·kg⁻¹·min⁻¹ (SEE ±5,0; r = 0,88).</p>
     </div>
 
     <div class="fila" style="margin-top:18px;">
@@ -594,7 +594,8 @@ function calcularVO2() {
   }
 
   const vo2Lmin = 6.9652 + (0.0091 * pesoLb) - (0.0257 * edad) + (0.5955 * sexo) - (0.2240 * t1) - (0.0115 * hr14);
-  const vo2Relativo = (vo2Lmin * 1000) / pesoKg;
+  // Ecuación generalizada independiente para ml·kg⁻¹·min⁻¹ (Tabla 4 del artículo), no una conversión de unidades de vo2Lmin.
+  const vo2Relativo = 132.853 + (-0.0769 * pesoLb) + (-0.3877 * edad) + (6.3150 * sexo) + (-3.2649 * t1) + (-0.1565 * hr14);
 
   document.getElementById("valorLmin").textContent = vo2Lmin.toFixed(2);
   document.getElementById("valorRelativo").textContent = vo2Relativo.toFixed(1);
@@ -852,7 +853,7 @@ async function descargarReporte() {
   const vRel = document.getElementById("valorRelativo").textContent;
   doc.setFillColor(...PDF_VERDE_CLARO);
   doc.setDrawColor(...PDF_BORDE_CLARO);
-  doc.roundedRect(MARGEN_X, y, ANCHO_UTIL, 20, 1.5, 1.5, "FD");
+  doc.roundedRect(MARGEN_X, y, ANCHO_UTIL, 24, 1.5, 1.5, "FD");
   doc.setTextColor(...PDF_VERDE_OSCURO);
   doc.setFont(undefined, "bold");
   doc.setFontSize(9.3);
@@ -862,9 +863,10 @@ async function descargarReporte() {
   doc.setFont(undefined, "normal");
   doc.setFontSize(7.6);
   doc.setTextColor(...PDF_GRIS);
-  doc.text("SEE reportado en el artículo original: ±0,325 L/min. Ecuación generalizada, r = 0,93.", MARGEN_X + 3, y + 17.3);
+  doc.text("Dos ecuaciones generalizadas independientes (no una conversión de unidades): L/min SEE ±0,325, r = 0,93  ·  ml/kg/min SEE ±5,0, r = 0,88.", MARGEN_X + 3, y + 17.3);
+  doc.text("Kline y cols. (1987).", MARGEN_X + 3, y + 21.3);
   doc.setTextColor(0, 0, 0);
-  y += 26;
+  y += 30;
 
   y = tituloSeccionPDF(doc, "Evaluación posterior", y);
   y = camposEnCuadricula(doc, [
