@@ -88,7 +88,6 @@
   .resultado-item{ text-align:left; }
   .resultado-item + .resultado-item{ border-left:1px solid #cfe8d7; padding-left:20px; }
   .resultado-etiqueta{ margin:0 0 4px; font-size:0.72rem; color:#666; text-transform:uppercase; letter-spacing:0.03em; }
-  .resultado-etiqueta-img{ display:block; height:19px; width:auto; margin:0 0 5px; }
   .resultado .valor{ font-size:1.4rem; font-weight:700; color:var(--verde-oscuro); }
   .resultado-valor small{ font-size:0.85rem; font-weight:400; color:#555; margin-left:4px; }
   .resultado-nota{ font-size:0.72rem; color:#666; margin:4px 0 0; }
@@ -408,14 +407,14 @@
     <div class="resultado" id="resultadoBox">
       <div class="resultado-grid">
         <div class="resultado-item">
-          <img class="resultado-etiqueta-img" src="formula-vo2-label.png" alt="VO2máx">
+          <p class="resultado-etiqueta">VO₂máx</p>
           <p class="resultado-valor valor"><span id="valorLmin">—</span> <small>L/min</small></p>
-          <p class="resultado-nota">SEE ±0,325, r = 0,93</p>
+          <p class="resultado-nota">SEE ±0,325; r = 0,93</p>
         </div>
         <div class="resultado-item">
-          <img class="resultado-etiqueta-img" src="formula-vo2-label-rel.png" alt="VO2máx relativo">
+          <p class="resultado-etiqueta">VO₂máx relativo</p>
           <p class="resultado-valor valor"><span id="valorRelativo">—</span> <small>ml·kg⁻¹·min⁻¹</small></p>
-          <p class="resultado-nota">SEE ±5,0, r = 0,88</p>
+          <p class="resultado-nota">SEE ±5,0; r = 0,88</p>
         </div>
       </div>
     </div>
@@ -1143,16 +1142,11 @@ async function descargarReporte() {
     ["FC último cuarto de milla (HR1-4)", `${val("hr14")} lpm`],
   ], y);
 
-  // ---- Resultado: los dos valores con la misma relevancia, uno al lado del otro,          ----
-  // ---- con la etiqueta VO2max tipografiada en TeX (misma notación que las ecuaciones)      ----
+  // ---- Resultado: los dos valores con la misma relevancia, uno al lado del otro ----
   const vLmin = document.getElementById("valorLmin").textContent;
   const vRel = document.getElementById("valorRelativo").textContent;
-  const labelAbs = await cargarImagenComoDataURL("formula-vo2-label.png");
-  const labelRel = await cargarImagenComoDataURL("formula-vo2-label-rel.png");
-  const dimLabelAbs = await obtenerDimensionesImagen(labelAbs);
-  const dimLabelRel = await obtenerDimensionesImagen(labelRel);
 
-  const altoBox = 40;
+  const altoBox = 38;
   doc.setFillColor(...CREMA_D);
   doc.roundedRect(MX2, y, AU2, altoBox, 2.5, 2.5, "F");
   doc.setFont(undefined, "bold"); doc.setFontSize(8); doc.setTextColor(...PDF_VERDE_OSCURO);
@@ -1162,30 +1156,28 @@ async function descargarReporte() {
   doc.setDrawColor(...PDF_BORDE_CLARO); doc.setLineWidth(0.3);
   doc.line(MX2 + mitad, y + 12, MX2 + mitad, y + altoBox - 5);
 
-  const hEtiq = 6.2;
-  const wEtiqAbs = dimLabelAbs ? hEtiq * (dimLabelAbs.ancho / dimLabelAbs.alto) : hEtiq * 2.325;
-  const wEtiqRel = dimLabelRel ? hEtiq * (dimLabelRel.ancho / dimLabelRel.alto) : hEtiq * 2.325;
-
   // Columna izquierda: VO2max absoluto
-  if (labelAbs) doc.addImage(labelAbs, "PNG", MX2 + 7, y + 10.3, wEtiqAbs, hEtiq);
+  doc.setFont(undefined, "normal"); doc.setFontSize(7.4); doc.setTextColor(...PDF_GRIS);
+  doc.text("VO2MAX", MX2 + 7, y + 16);
   doc.setFont(undefined, "bold"); doc.setFontSize(19); doc.setTextColor(...PDF_VERDE_OSCURO);
-  doc.text(vLmin, MX2 + 7, y + 28);
+  doc.text(vLmin, MX2 + 7, y + 26);
   const wLmin = doc.getTextWidth(vLmin);
   doc.setFont(undefined, "normal"); doc.setFontSize(8); doc.setTextColor(80, 80, 80);
-  doc.text("L/min", MX2 + 7 + wLmin + 2.5, y + 28);
+  doc.text("L/min", MX2 + 7 + wLmin + 2.5, y + 26);
   doc.setFont(undefined, "normal"); doc.setFontSize(6.6); doc.setTextColor(...PDF_GRIS);
-  doc.text("SEE ±0,325, r = 0,93", MX2 + 7, y + 34.5);
+  doc.text("SEE ±0,325; r = 0,93", MX2 + 7, y + 32.5);
 
   // Columna derecha: VO2max relativo
   const xDer = MX2 + mitad + 7;
-  if (labelRel) doc.addImage(labelRel, "PNG", xDer, y + 10.3, wEtiqRel, hEtiq);
+  doc.setFont(undefined, "normal"); doc.setFontSize(7.4); doc.setTextColor(...PDF_GRIS);
+  doc.text("VO2MAX RELATIVO", xDer, y + 16);
   doc.setFont(undefined, "bold"); doc.setFontSize(19); doc.setTextColor(...PDF_VERDE_OSCURO);
-  doc.text(vRel, xDer, y + 28);
+  doc.text(vRel, xDer, y + 26);
   const wRel = doc.getTextWidth(vRel);
   doc.setFont(undefined, "normal"); doc.setFontSize(8); doc.setTextColor(80, 80, 80);
-  doc.text("ml/kg/min", xDer + wRel + 2.5, y + 28);
+  doc.text("ml/kg/min", xDer + wRel + 2.5, y + 26);
   doc.setFont(undefined, "normal"); doc.setFontSize(6.6); doc.setTextColor(...PDF_GRIS);
-  doc.text("SEE ±5,0, r = 0,88", xDer, y + 34.5);
+  doc.text("SEE ±5,0; r = 0,88", xDer, y + 32.5);
 
   y += altoBox + 5;
   doc.setTextColor(0, 0, 0);
