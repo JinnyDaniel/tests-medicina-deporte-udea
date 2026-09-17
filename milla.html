@@ -752,6 +752,16 @@ async function cargarImagenComoDataURL(ruta) {
   }
 }
 
+// ---------- Utilidad: dimensiones reales de una imagen (para no deformarla) ----------
+function obtenerDimensionesImagen(dataUrl) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve({ ancho: img.naturalWidth, alto: img.naturalHeight });
+    img.onerror = () => resolve(null);
+    img.src = dataUrl;
+  });
+}
+
 // ---------- Paleta de color (misma que la página) ----------
 const PDF_VERDE = [15, 92, 51];
 const PDF_VERDE_OSCURO = [10, 61, 34];
@@ -765,8 +775,10 @@ async function encabezadoPDF(doc, tituloDocumento) {
   const logoPersonal = await cargarImagenComoDataURL("mi-logo.png");
   let y = 14;
   if (logoPersonal) {
-    // Aspecto real del logo (~500x296) para no deformar el texto que contiene.
-    const anchoLogo = 58, altoLogo = anchoLogo * (296 / 500);
+    // Aspecto real del logo calculado dinámicamente para no deformar el texto que contiene.
+    const dimLogo = await obtenerDimensionesImagen(logoPersonal);
+    const anchoLogo = 58;
+    const altoLogo = dimLogo ? anchoLogo * (dimLogo.alto / dimLogo.ancho) : anchoLogo * (260 / 513);
     doc.addImage(logoPersonal, "PNG", MARGEN_X, y, anchoLogo, altoLogo);
   }
   doc.setTextColor(...PDF_VERDE_OSCURO);
