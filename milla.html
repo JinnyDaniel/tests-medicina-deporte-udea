@@ -524,8 +524,8 @@ const DEFINICIONES_CAMPO = {
   t1: "Tiempo total transcurrido en caminar la milla completa (1609 m).",
   hr14: "Promedio de las dos últimas lecturas de frecuencia cardíaca de 1 minuto (monitoreo continuo) al llegar al último cuarto de milla. Una lectura puntual única al finalizar es una aproximación práctica a este método.",
   fcmax: "El artículo emplea la frecuencia cardíaca máxima edad-predicha como uno de los criterios para confirmar el esfuerzo máximo real en su propio protocolo de banda, sin especificar una fórmula propia para calcularla. Aquí se aplica la convención estándar de la época: 220 − edad (Fox y cols., 1971).",
-  vo2max: "Consumo máximo de oxígeno estimado en términos absolutos, en litros por minuto (L/min), mediante la ecuación generalizada de Kline y cols. (1987) para VO2máx en L/min (SEE ±0,325; r = 0,93).",
-  vo2maxrel: "Consumo máximo de oxígeno estimado en relación con el peso corporal, en mililitros por kilogramo de peso por minuto (ml·kg⁻¹·min⁻¹), mediante una ecuación generalizada independiente de Kline y cols. (1987) —no una conversión del valor absoluto— ajustada directamente sobre esa unidad (SEE ±5,0; r = 0,88).",
+  vo2max: "SEE (error estándar de estimación): diferencia típica, en L/min, entre el VO2máx que predice esta ecuación y el VO2máx medido directamente por prueba de esfuerzo en el grupo de validación de Kline y cols. (1987); a menor SEE, mayor precisión de la estimación. r: coeficiente de correlación de Pearson entre el valor estimado y el medido en ese grupo (máximo 1); indica qué tan fuerte es esa asociación, no la magnitud del error.",
+  vo2maxrel: "SEE (error estándar de estimación): diferencia típica, en ml·kg⁻¹·min⁻¹, entre el VO2máx relativo que predice esta ecuación —ajustada de forma independiente, no una conversión de la ecuación en L/min— y el valor medido directamente en el grupo de validación de Kline y cols. (1987); a menor SEE, mayor precisión. r: coeficiente de correlación de Pearson entre el valor estimado y el medido en ese grupo (máximo 1).",
 };
 
 document.querySelectorAll(".info-btn").forEach((btn) => {
