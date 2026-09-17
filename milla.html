@@ -87,7 +87,7 @@
   .resultado-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
   .resultado-item{ text-align:left; }
   .resultado-item + .resultado-item{ border-left:1px solid #cfe8d7; padding-left:20px; }
-  .resultado-etiqueta{ margin:0 0 4px; font-size:0.72rem; color:#666; text-transform:uppercase; letter-spacing:0.03em; }
+  .resultado-etiqueta{ margin:0 0 4px; font-size:0.72rem; color:#666; letter-spacing:0.03em; }
   .resultado .valor{ font-size:1.4rem; font-weight:700; color:var(--verde-oscuro); }
   .resultado-valor small{ font-size:0.85rem; font-weight:400; color:#555; margin-left:4px; }
   .resultado-nota{ font-size:0.72rem; color:#666; margin:4px 0 0; }
@@ -291,7 +291,7 @@
     <input type="text" id="nombre">
 
     <div class="fila">
-      <div><label>Edad (años)</label><input type="number" id="edad" min="0"></div>
+      <div><label>Edad (años)</label><input type="number" id="edad" min="5" max="100"></div>
       <div><label>Documento de identidad</label><input type="text" id="id"></div>
       <div><label>Sexo</label>
         <select id="sexo">
@@ -319,12 +319,12 @@
     <input type="text" id="alergias">
 
     <div class="fila">
-      <div><label>Peso (kg)</label><input type="number" step="0.1" id="peso" oninput="actualizarPesoLb()"></div>
+      <div><label>Peso (kg)</label><input type="number" step="0.1" id="peso" min="20" max="250" oninput="actualizarPesoLb()"></div>
       <div><label>Peso (lb) — calculado automáticamente</label><input type="text" id="pesoLb" disabled></div>
-      <div><label>Talla (cm)</label><input type="number" id="talla"></div>
+      <div><label>Talla (cm)</label><input type="number" id="talla" min="100" max="230"></div>
     </div>
     <div class="fila">
-      <div><label>FC de reposo (lpm)</label><input type="number" id="fcReposo"></div>
+      <div><label>FC de reposo (lpm)</label><input type="number" id="fcReposo" min="30" max="150"></div>
       <div><label>TA de reposo (mmHg)</label><input type="text" id="taReposo"></div>
       <div><label>FC máxima calculada¹ (220 − edad) <button type="button" class="info-btn" data-tip="fcmax" aria-label="Definición">?</button></label><input type="text" id="fcMax" disabled></div>
     </div>
@@ -391,9 +391,9 @@
     <div class="nota-metodo" style="margin-top:0;">Kline GM, Porcari JP, Hintermeister R, Freedson PS, Ward A, McCarron RF, Ross J, Rippe JM. Estimation of VO<sub>2</sub>max from a one-mile track walk, gender, age, and body weight. <em>Med Sci Sports Exerc.</em> 1987;19(3):253-9.</div>
 
     <div class="fila" style="margin-top:14px;">
-      <div><label>Tiempo total T1 (min) <button type="button" class="info-btn" data-tip="t1" aria-label="Definición">?</button></label><input type="number" id="t1min" min="0"></div>
+      <div><label>Tiempo total T1 (min) <button type="button" class="info-btn" data-tip="t1" aria-label="Definición">?</button></label><input type="number" id="t1min" min="0" max="60"></div>
       <div><label>Tiempo total T1 (seg adicionales)</label><input type="number" id="t1seg" min="0" max="59"></div>
-      <div><label>FC último cuarto de milla (HR1-4, lpm) <button type="button" class="info-btn" data-tip="hr14" aria-label="Definición">?</button></label><input type="number" id="hr14"></div>
+      <div><label>FC último cuarto de milla (HR1-4, lpm) <button type="button" class="info-btn" data-tip="hr14" aria-label="Definición">?</button></label><input type="number" id="hr14" min="60" max="220"></div>
     </div>
 
     <div class="formula-box">
@@ -409,18 +409,18 @@
         <div class="resultado-item">
           <p class="resultado-etiqueta">VO₂máx</p>
           <p class="resultado-valor valor"><span id="valorLmin">—</span> <small>L/min</small></p>
-          <p class="resultado-nota">SEE ±0,325; r = 0,93</p>
+          <p class="resultado-nota">SEE ±0,325; r = 0,93 <button type="button" class="info-btn" data-tip="vo2max" aria-label="Definición">?</button></p>
         </div>
         <div class="resultado-item">
           <p class="resultado-etiqueta">VO₂máx relativo</p>
           <p class="resultado-valor valor"><span id="valorRelativo">—</span> <small>ml·kg⁻¹·min⁻¹</small></p>
-          <p class="resultado-nota">SEE ±5,0; r = 0,88</p>
+          <p class="resultado-nota">SEE ±5,0; r = 0,88 <button type="button" class="info-btn" data-tip="vo2maxrel" aria-label="Definición">?</button></p>
         </div>
       </div>
     </div>
 
     <div class="fila" style="margin-top:18px;">
-      <div><label>FC de recuperación (lpm)</label><input type="number" id="fcRecuperacion"></div>
+      <div><label>FC de recuperación (lpm)</label><input type="number" id="fcRecuperacion" min="30" max="220"></div>
       <div><label>TA de recuperación (mmHg)</label><input type="text" id="taRecuperacion"></div>
     </div>
     <label>Síntomas</label>
@@ -524,6 +524,8 @@ const DEFINICIONES_CAMPO = {
   t1: "Tiempo total transcurrido en caminar la milla completa (1609 m).",
   hr14: "Promedio de las dos últimas lecturas de frecuencia cardíaca de 1 minuto (monitoreo continuo) al llegar al último cuarto de milla. Una lectura puntual única al finalizar es una aproximación práctica a este método.",
   fcmax: "El artículo emplea la frecuencia cardíaca máxima edad-predicha como uno de los criterios para confirmar el esfuerzo máximo real en su propio protocolo de banda, sin especificar una fórmula propia para calcularla. Aquí se aplica la convención estándar de la época: 220 − edad (Fox y cols., 1971).",
+  vo2max: "Consumo máximo de oxígeno estimado en términos absolutos, en litros por minuto (L/min), mediante la ecuación generalizada de Kline y cols. (1987) para VO2máx en L/min (SEE ±0,325; r = 0,93).",
+  vo2maxrel: "Consumo máximo de oxígeno estimado en relación con el peso corporal, en mililitros por kilogramo de peso por minuto (ml·kg⁻¹·min⁻¹), mediante una ecuación generalizada independiente de Kline y cols. (1987) —no una conversión del valor absoluto— ajustada directamente sobre esa unidad (SEE ±5,0; r = 0,88).",
 };
 
 document.querySelectorAll(".info-btn").forEach((btn) => {
@@ -744,8 +746,101 @@ function firmaEstaVacia() {
   return canvas.toDataURL() === blanco.toDataURL();
 }
 
+// ---------- Verificación de datos razonables ----------
+// Rangos amplios de plausibilidad clínica: no imponen los criterios de elegibilidad del
+// estudio original (p. ej. edad 30-69 años en Kline y cols.), solo evitan valores absurdos
+// o errores de digitación (p. ej. un peso de 900 kg o una FC de 900 lpm).
+const RANGOS_RAZONABLES = {
+  edad: { min: 5, max: 100, etiqueta: "La edad" },
+  peso: { min: 20, max: 250, etiqueta: "El peso" },
+  talla: { min: 100, max: 230, etiqueta: "La talla" },
+  fcReposo: { min: 30, max: 150, etiqueta: "La FC de reposo" },
+  hr14: { min: 60, max: 220, etiqueta: "La FC del último cuarto de milla (HR1-4)" },
+  fcRecuperacion: { min: 30, max: 220, etiqueta: "La FC de recuperación" },
+};
+
+function validarRangoNumerico(id) {
+  const el = document.getElementById(id);
+  const cfg = RANGOS_RAZONABLES[id];
+  const valor = el.value.trim();
+  if (valor === "") return true; // campo vacío: lo exigen calcularVO2()/descargar si es obligatorio
+  const n = parseFloat(valor);
+  if (!isFinite(n) || n < cfg.min || n > cfg.max) {
+    alert(`${cfg.etiqueta} debe ser un valor razonable, entre ${cfg.min} y ${cfg.max}. Revise el valor ingresado (${valor}).`);
+    el.focus();
+    return false;
+  }
+  return true;
+}
+
+function validarTiempoT1() {
+  const elMin = document.getElementById("t1min");
+  const elSeg = document.getElementById("t1seg");
+  const min = parseFloat(elMin.value);
+  const seg = parseFloat(elSeg.value);
+  if (elMin.value.trim() !== "" && (!isFinite(min) || min < 0 || min > 60)) {
+    alert("Los minutos del tiempo T1 deben ser un valor razonable, entre 0 y 60.");
+    elMin.focus();
+    return false;
+  }
+  if (elSeg.value.trim() !== "" && (!isFinite(seg) || seg < 0 || seg > 59)) {
+    alert("Los segundos adicionales del tiempo T1 deben estar entre 0 y 59.");
+    elSeg.focus();
+    return false;
+  }
+  return true;
+}
+
+function validarPresionArterial(id, etiqueta) {
+  const el = document.getElementById(id);
+  const valor = el.value.trim();
+  if (valor === "") return true;
+  const m = valor.match(/^(\d{2,3})\s*\/\s*(\d{2,3})$/);
+  if (!m) {
+    alert(`${etiqueta} debe tener el formato "sistólica/diastólica" (por ejemplo, 120/80).`);
+    el.focus();
+    return false;
+  }
+  const sistolica = parseInt(m[1], 10);
+  const diastolica = parseInt(m[2], 10);
+  if (sistolica < 60 || sistolica > 260 || diastolica < 30 || diastolica > 150 || diastolica >= sistolica) {
+    alert(`${etiqueta} tiene un valor fuera de un rango fisiológicamente razonable (sistólica 60-260 mmHg, diastólica 30-150 mmHg, sistólica mayor que diastólica). Revise "${valor}".`);
+    el.focus();
+    return false;
+  }
+  return true;
+}
+
+function validarTelefono(id, etiqueta) {
+  const el = document.getElementById(id);
+  const valor = el.value.trim();
+  if (valor === "") return true;
+  const soloDigitos = valor.replace(/[\s()+-]/g, "");
+  if (!/^\d{7,15}$/.test(soloDigitos)) {
+    alert(`${etiqueta} debe contener solo números (puede incluir +, espacios o guiones) y tener entre 7 y 15 dígitos.`);
+    el.focus();
+    return false;
+  }
+  return true;
+}
+
+// Punto único de verificación: se llama antes de calcular y antes de descargar cada PDF,
+// para que en cualquiera de esos momentos solo se pueda continuar con datos razonables.
+function validarDatosRazonables() {
+  for (const id of Object.keys(RANGOS_RAZONABLES)) {
+    if (!validarRangoNumerico(id)) return false;
+  }
+  if (!validarTiempoT1()) return false;
+  if (!validarPresionArterial("taReposo", "La TA de reposo")) return false;
+  if (!validarPresionArterial("taRecuperacion", "La TA de recuperación")) return false;
+  if (!validarTelefono("contactoEmergenciaTel", "El teléfono del contacto de emergencia")) return false;
+  return true;
+}
+
 // ---------- Cálculo VO2max (Kline et al., 1987) ----------
 function calcularVO2() {
+  if (!validarDatosRazonables()) return;
+
   const pesoKg = parseFloat(document.getElementById("peso").value);
   const pesoLb = pesoKg * 2.2046;
   const edad = parseFloat(document.getElementById("edad").value);
@@ -839,9 +934,12 @@ function dibujarSidebarD(doc, { logoDataUrl, dimLogo, etiquetaPersona, nombre, d
     arr.forEach((l) => { const w = doc.splitTextToSize(l, SW - 17); doc.text(w, 9, sy); sy += w.length * salto; });
   }
   etiqueta(etiquetaPersona);
-  lineas([nombre], 9.2, NEGRO_SIDEBAR);
-  lineas([`Doc. ${doc_id}`, `${edad} años · ${sexoTexto}`], 7.8, [90, 95, 92]);
-  sy += 5;
+  doc.setFont(undefined, "bold"); doc.setFontSize(13); doc.setTextColor(...NEGRO_SIDEBAR);
+  const lineasNombre = doc.splitTextToSize(nombre, SW - 17);
+  doc.text(lineasNombre, 9, sy);
+  sy += lineasNombre.length * 5.8 + 1;
+  lineas([`Doc. ${doc_id}`, `${edad} años · ${sexoTexto}`], 8.6, [60, 66, 62]);
+  sy += 6;
   etiqueta("Contacto de emergencia");
   lineas([contactoNombre || "-", contactoTel || "-"], 7.8, [90, 95, 92]);
   sy += 5;
@@ -967,6 +1065,7 @@ function escribirParrafo(doc, texto, x, y, maxAncho, alturaLinea) {
 
 // ---------- PDF: Consentimiento informado (diseño con barra lateral) ----------
 async function descargarConsentimiento() {
+  if (!validarDatosRazonables()) return;
   if (!document.getElementById("aceptoConsent").checked) {
     alert('Marque la casilla "He leído y comprendido..." antes de descargar el consentimiento.');
     return;
@@ -1064,6 +1163,7 @@ async function descargarConsentimiento() {
 
 // ---------- PDF: Reporte del test (diseño con barra lateral) ----------
 async function descargarReporte() {
+  if (!validarDatosRazonables()) return;
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
@@ -1158,7 +1258,7 @@ async function descargarReporte() {
 
   // Columna izquierda: VO2max absoluto
   doc.setFont(undefined, "normal"); doc.setFontSize(7.4); doc.setTextColor(...PDF_GRIS);
-  doc.text("VO2MAX", MX2 + 7, y + 16);
+  doc.text("VO2max", MX2 + 7, y + 16);
   doc.setFont(undefined, "bold"); doc.setFontSize(19); doc.setTextColor(...PDF_VERDE_OSCURO);
   doc.text(vLmin, MX2 + 7, y + 26);
   const wLmin = doc.getTextWidth(vLmin);
@@ -1170,7 +1270,7 @@ async function descargarReporte() {
   // Columna derecha: VO2max relativo
   const xDer = MX2 + mitad + 7;
   doc.setFont(undefined, "normal"); doc.setFontSize(7.4); doc.setTextColor(...PDF_GRIS);
-  doc.text("VO2MAX RELATIVO", xDer, y + 16);
+  doc.text("VO2max relativo", xDer, y + 16);
   doc.setFont(undefined, "bold"); doc.setFontSize(19); doc.setTextColor(...PDF_VERDE_OSCURO);
   doc.text(vRel, xDer, y + 26);
   const wRel = doc.getTextWidth(vRel);
