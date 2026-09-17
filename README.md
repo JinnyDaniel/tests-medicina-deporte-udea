@@ -13,6 +13,8 @@ Incluye por ahora el **test de caminata de 1 milla (Rockport Walk Test)**, sigui
 - `jspdf.umd.min.js` — librería para generar los PDF (no requiere internet).
 - `mi-logo.png` — tu logo personal (el único logo usado en toda la página y en los PDF).
 - `favicon.ico` y `favicon.png` — ícono de la pestaña del navegador.
+- `formula-vo2-lmin.png` y `formula-vo2-relativo.png` — las dos ecuaciones de Kline y cols. (1987), tipografiadas en notación matemática (TeX), tal como aparecen en la página junto al formulario.
+- `formula-vo2-label.png` y `formula-vo2-label-rel.png` — el símbolo "VO₂máx" en la misma notación matemática, usado junto al resultado (en la página y en el reporte PDF).
 
 No cambies los nombres de estos archivos: el código los busca exactamente con esos nombres.
 
@@ -22,7 +24,7 @@ No cambies los nombres de estos archivos: el código los busca exactamente con e
 2. Arriba a la derecha, haz clic en el **+** y elige **New repository**.
 3. Ponle un nombre (por ejemplo `tests-medicina-deporte`), déjalo en **Public**, y haz clic en **Create repository**. No marques ninguna otra opción.
 4. En la página del repositorio recién creado, haz clic en **Add file → Upload files**.
-5. Arrastra los 6 archivos de esta carpeta (`index.html`, `milla.html`, `jspdf.umd.min.js`, `mi-logo.png`, `favicon.ico`, `favicon.png`) a la ventana del navegador, o haz clic en "choose your files" y selecciónalos todos a la vez.
+5. Arrastra los 10 archivos de esta carpeta (`index.html`, `milla.html`, `jspdf.umd.min.js`, `mi-logo.png`, `favicon.ico`, `favicon.png`, `formula-vo2-lmin.png`, `formula-vo2-relativo.png`, `formula-vo2-label.png`, `formula-vo2-label-rel.png`) a la ventana del navegador, o haz clic en "choose your files" y selecciónalos todos a la vez.
 6. Baja hasta el final de la página y haz clic en **Commit changes**.
 7. Ve a la pestaña **Settings** del repositorio (arriba).
 8. En el menú de la izquierda, haz clic en **Pages**.

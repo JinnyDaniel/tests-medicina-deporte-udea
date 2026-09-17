@@ -83,8 +83,15 @@
   }
   .privacidad-box p{ margin:0 0 8px; font-size:0.86rem; line-height:1.55; }
   .privacidad-box p:last-child{ margin-bottom:0; }
-  .resultado{ margin-top:18px; padding:16px; background:#eef7f0; border:1px solid #cfe8d7; border-radius:8px; display:none; }
+  .resultado{ margin-top:18px; padding:18px 20px; background:#eef7f0; border:1px solid #cfe8d7; border-radius:8px; display:none; }
+  .resultado-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .resultado-item{ text-align:left; }
+  .resultado-item + .resultado-item{ border-left:1px solid #cfe8d7; padding-left:20px; }
+  .resultado-etiqueta{ margin:0 0 4px; font-size:0.72rem; color:#666; text-transform:uppercase; letter-spacing:0.03em; }
+  .resultado-etiqueta-img{ display:block; height:19px; width:auto; margin:0 0 5px; }
   .resultado .valor{ font-size:1.4rem; font-weight:700; color:var(--verde-oscuro); }
+  .resultado-valor small{ font-size:0.85rem; font-weight:400; color:#555; margin-left:4px; }
+  .resultado-nota{ font-size:0.72rem; color:#666; margin:4px 0 0; }
   .nota-metodo{ font-size:0.78rem; color:#666; margin-top:6px; }
   .parq-intro{ font-size:0.88rem; color:#555; margin:2px 0 16px; }
   .nota-pdf{ font-size:0.78rem; color:#777; margin-top:10px; }
@@ -210,6 +217,8 @@
   }
   .formula-tex:last-child{ margin-bottom:0; }
   .formula-tex .op{ color:var(--verde-oscuro); font-weight:600; }
+  .formula-img{ display:block; max-width:100%; height:auto; margin-bottom:12px; }
+  .formula-img:last-child{ margin-bottom:0; }
 </style>
 </head>
 <body>
@@ -390,16 +399,25 @@
 
     <div class="formula-box">
       <p class="formula-titulo">Ecuación utilizada (Kline y cols., 1987)</p>
-      <p class="formula-tex"><strong>VO₂máx (L/min)</strong> <span class="op">=</span> 6.9652 + 0.0091 × Peso(lb) − 0.0257 × Edad + 0.5955 × Sexo(H=1, M=0) − 0.2240 × T1(min) − 0.0115 × HR1-4(lpm)</p>
-      <p class="formula-tex"><strong>VO₂máx relativo (ml·kg⁻¹·min⁻¹)</strong> <span class="op">=</span> 132.853 − 0.0769 × Peso(lb) − 0.3877 × Edad + 6.3150 × Sexo(H=1, M=0) − 3.2649 × T1(min) − 0.1565 × HR1-4(lpm)</p>
+      <img class="formula-img" src="formula-vo2-lmin.png" alt="VO2máx (L/min) = 6.9652 + 0.0091 × Peso(lb) − 0.0257 × Edad + 0.5955 × Sexo − 0.2240 × T1 − 0.0115 × HR1-4">
+      <img class="formula-img" src="formula-vo2-relativo.png" alt="VO2máx relativo (ml·kg⁻¹·min⁻¹) = 132.853 − 0.0769 × Peso(lb) − 0.3877 × Edad + 6.3150 × Sexo − 3.2649 × T1 − 0.1565 × HR1-4">
     </div>
 
     <button type="button" style="margin-top:0;" onclick="calcularVO2()">Calcular VO₂máx</button>
 
     <div class="resultado" id="resultadoBox">
-      <p>VO₂máx: <span class="valor" id="valorLmin">—</span> L/min</p>
-      <p>VO₂máx relativo: <span class="valor" id="valorRelativo">—</span> ml·kg⁻¹·min⁻¹</p>
-      <p class="nota-metodo">Dos ecuaciones generalizadas independientes del artículo original (Kline y cols., 1987), no una conversión de unidades entre ambas: L/min (SEE ±0,325; r = 0,93) y ml·kg⁻¹·min⁻¹ (SEE ±5,0; r = 0,88).</p>
+      <div class="resultado-grid">
+        <div class="resultado-item">
+          <img class="resultado-etiqueta-img" src="formula-vo2-label.png" alt="VO2máx">
+          <p class="resultado-valor valor"><span id="valorLmin">—</span> <small>L/min</small></p>
+          <p class="resultado-nota">SEE ±0,325, r = 0,93</p>
+        </div>
+        <div class="resultado-item">
+          <img class="resultado-etiqueta-img" src="formula-vo2-label-rel.png" alt="VO2máx relativo">
+          <p class="resultado-valor valor"><span id="valorRelativo">—</span> <small>ml·kg⁻¹·min⁻¹</small></p>
+          <p class="resultado-nota">SEE ±5,0, r = 0,88</p>
+        </div>
+      </div>
     </div>
 
     <div class="fila" style="margin-top:18px;">
@@ -787,6 +805,91 @@ const PDF_GRIS = [110, 110, 110];
 const MARGEN_X = 15;
 const ANCHO_UTIL = 180; // 210mm A4 - 2*15mm
 
+// ---------- Diseño con barra lateral (reporte y consentimiento) ----------
+const SW = 58; // ancho de la barra lateral, mm
+const MX2 = SW + 10; // margen izquierdo de la columna principal
+const AU2 = 210 - MX2 - 12; // ancho útil de la columna principal
+const VERDE_CLARO_SIDEBAR = [240, 247, 242];
+const BORDE_SIDEBAR = [205, 225, 213];
+const NEGRO_SIDEBAR = [30, 34, 32];
+const CREMA_D = [246, 248, 244];
+
+// "Evaluado" o "Evaluada" según el sexo registrado; forma neutra si no se especificó.
+function etiquetaEvaluado(sexoVal) {
+  return sexoVal === "1" ? "Evaluado" : (sexoVal === "0" ? "Evaluada" : "Evaluado/a");
+}
+
+function dibujarSidebarD(doc, { logoDataUrl, dimLogo, etiquetaPersona, nombre, doc_id, edad, sexoTexto, contactoNombre, contactoTel, fecha, examinador }) {
+  doc.setFillColor(...VERDE_CLARO_SIDEBAR);
+  doc.rect(0, 0, SW, 297, "F");
+  doc.setDrawColor(...BORDE_SIDEBAR); doc.setLineWidth(0.6);
+  doc.line(SW, 0, SW, 297);
+
+  if (logoDataUrl) {
+    const logoW = 38, logoH = dimLogo ? logoW * (dimLogo.alto / dimLogo.ancho) : logoW * (260 / 513);
+    doc.addImage(logoDataUrl, "PNG", 10, 16, logoW, logoH);
+  }
+
+  let sy = 52;
+  function etiqueta(txt) {
+    doc.setFont(undefined, "bold"); doc.setFontSize(7.2); doc.setTextColor(...PDF_VERDE_OSCURO);
+    doc.text(txt.toUpperCase(), 9, sy); sy += 5;
+  }
+  function lineas(arr, tam, color, salto = 4.6) {
+    doc.setFont(undefined, "normal"); doc.setFontSize(tam); doc.setTextColor(...color);
+    arr.forEach((l) => { const w = doc.splitTextToSize(l, SW - 17); doc.text(w, 9, sy); sy += w.length * salto; });
+  }
+  etiqueta(etiquetaPersona);
+  lineas([nombre], 9.2, NEGRO_SIDEBAR);
+  lineas([`Doc. ${doc_id}`, `${edad} años · ${sexoTexto}`], 7.8, [90, 95, 92]);
+  sy += 5;
+  etiqueta("Contacto de emergencia");
+  lineas([contactoNombre || "-", contactoTel || "-"], 7.8, [90, 95, 92]);
+  sy += 5;
+  etiqueta("Fecha");
+  lineas([fecha], 8.6, NEGRO_SIDEBAR);
+  sy += 5;
+  etiqueta("Examinador");
+  lineas([examinador], 8.6, NEGRO_SIDEBAR);
+
+  doc.setDrawColor(...BORDE_SIDEBAR); doc.setLineWidth(0.15);
+  doc.line(9, 262, SW - 9, 262);
+  doc.setFont(undefined, "normal"); doc.setFontSize(6.4); doc.setTextColor(120, 130, 124);
+  doc.text("Medicina del Deporte y la\nActividad Física\nUniversidad de Antioquia\nRM 1012383458", 9, 268);
+  doc.setTextColor(0, 0, 0);
+}
+
+function tituloD(doc, texto, y) {
+  doc.setFillColor(...PDF_VERDE_OSCURO);
+  doc.roundedRect(MX2, y, AU2, 6.4, 1, 1, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(8.4);
+  doc.setFont(undefined, "bold");
+  doc.text(texto.toUpperCase(), MX2 + 3, y + 4.5);
+  doc.setFont(undefined, "normal");
+  doc.setTextColor(0, 0, 0);
+  return y + 10;
+}
+
+// Imprime pares [etiqueta, valor] en una sola columna ("lista compacta") para la columna
+// principal del diseño con barra lateral.
+function camposListaD(doc, pares, y, tam = 8.4, salto = 4.9) {
+  doc.setFontSize(tam);
+  pares.forEach(([label, val]) => {
+    if (!label) return;
+    doc.setFont(undefined, "bold");
+    const et = label + ": ";
+    doc.text(et, MX2, y);
+    const w = doc.getTextWidth(et);
+    doc.setFont(undefined, "normal");
+    const restante = AU2 - w;
+    const ls = doc.splitTextToSize(String(val || "-"), restante);
+    doc.text(ls, MX2 + w, y);
+    y += Math.max(1, ls.length) * salto;
+  });
+  return y + 2;
+}
+
 async function encabezadoPDF(doc, tituloDocumento) {
   const logoPersonal = await cargarImagenComoDataURL("mi-logo.png");
   let y = 14;
@@ -863,7 +966,7 @@ function escribirParrafo(doc, texto, x, y, maxAncho, alturaLinea) {
   return y + lineas.length * alturaLinea;
 }
 
-// ---------- PDF: Consentimiento informado ----------
+// ---------- PDF: Consentimiento informado (diseño con barra lateral) ----------
 async function descargarConsentimiento() {
   if (!document.getElementById("aceptoConsent").checked) {
     alert('Marque la casilla "He leído y comprendido..." antes de descargar el consentimiento.');
@@ -875,184 +978,232 @@ async function descargarConsentimiento() {
   }
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  let y = await encabezadoPDF(doc, "Consentimiento informado — Test de caminata de 1 milla");
+
+  const logoPersonal = await cargarImagenComoDataURL("mi-logo.png");
+  const dimLogo = await obtenerDimensionesImagen(logoPersonal);
 
   const nombre = document.getElementById("nombre").value || "____________________";
   const idParticipante = document.getElementById("id").value || "____________________";
   const fecha = document.getElementById("fecha").value || new Date().toLocaleDateString();
+  const evaluador = document.getElementById("nombreEvaluador").value || "____________________";
+  const sexoVal = document.getElementById("sexo").value;
+  const sexoTexto = sexoVal === "1" ? "Hombre" : (sexoVal === "0" ? "Mujer" : "-");
 
-  doc.setFontSize(9.8);
-  const parrafo1 = `Yo, ${nombre}, con documento N.o ${idParticipante}, he sido informado/a sobre la naturaleza, los objetivos, los beneficios y los riesgos del test de caminata de 1 milla, que se me propone realizar como parte de una evaluacion de mi condicion fisica.`;
-  y = escribirParrafo(doc, parrafo1, MARGEN_X, y, ANCHO_UTIL, 4.6) + 4;
+  dibujarSidebarD(doc, {
+    logoDataUrl: logoPersonal, dimLogo, etiquetaPersona: etiquetaEvaluado(sexoVal),
+    nombre, doc_id: idParticipante, edad: document.getElementById("edad").value || "-", sexoTexto,
+    contactoNombre: document.getElementById("contactoEmergenciaNombre").value,
+    contactoTel: document.getElementById("contactoEmergenciaTel").value,
+    fecha, examinador: evaluador,
+  });
+
+  doc.setFont(undefined, "bold"); doc.setFontSize(16.5); doc.setTextColor(30, 34, 32);
+  doc.text("Consentimiento informado", MX2, 24);
+  doc.setFont(undefined, "normal"); doc.setFontSize(9.3); doc.setTextColor(...PDF_GRIS);
+  doc.text("Test de caminata de 1 milla — Kline y cols. (1987)", MX2, 30.5);
+  let y = 42;
+
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(9);
+  const parrafo1 = `Yo, ${nombre}, con documento N.o ${idParticipante}, he sido informado/a sobre la naturaleza, los objetivos, los beneficios y los riesgos del test de caminata de 1 milla, que se me propone realizar como parte de una evaluación de mi condición física.`;
+  y = escribirParrafo(doc, parrafo1, MX2, y, AU2, 4.3) + 4;
 
   doc.setTextColor(...PDF_VERDE_OSCURO);
-  doc.setFont(undefined, "bold"); doc.text("Se me ha explicado que:", MARGEN_X, y); doc.setFont(undefined, "normal"); doc.setTextColor(0, 0, 0); y += 5.5;
+  doc.setFont(undefined, "bold"); doc.setFontSize(8.6); doc.text("SE ME HA EXPLICADO QUE:", MX2, y); doc.setFont(undefined, "normal"); doc.setTextColor(0, 0, 0); y += 5;
+  doc.setFontSize(9);
   const puntos1 = [
-    "Es una prueba submaxima de capacidad aerobica que consiste en caminar 1 milla (1609 metros) en una superficie plana y medida, lo mas rapido posible, sin trotar ni correr.",
-    "Al finalizar se registraran mi tiempo y mi frecuencia cardiaca, con los cuales se estimara mi consumo maximo de oxigeno (VO2max) mediante una ecuacion validada (Kline y cols., 1987).",
-    "La prueba se detiene si ya no puedo continuar, por decision personal o ante cualquier situacion de riesgo para mi salud o integridad.",
+    "Es una prueba submáxima de capacidad aeróbica que consiste en caminar 1 milla (1609 metros) en una superficie plana y medida, lo más rápido posible, sin trotar ni correr.",
+    "Al finalizar se registrarán mi tiempo y mi frecuencia cardíaca, con los cuales se estimará mi consumo máximo de oxígeno (VO2max) mediante una ecuación validada (Kline y cols., 1987).",
+    "La prueba se detiene si ya no puedo continuar, por decisión personal o ante cualquier situación de riesgo para mi salud o integridad.",
   ];
-  puntos1.forEach(p => { y = escribirParrafo(doc, "•  " + p, MARGEN_X + 1, y, ANCHO_UTIL - 1, 4.6) + 1.5; });
+  puntos1.forEach((p) => { y = escribirParrafo(doc, "•  " + p, MX2 + 1, y, AU2 - 1, 4.3) + 1.3; });
 
-  y += 2;
+  y += 1.5;
   doc.setTextColor(...PDF_VERDE_OSCURO);
-  doc.setFont(undefined, "bold"); doc.text("También se me ha informado que:", MARGEN_X, y); doc.setFont(undefined, "normal"); doc.setTextColor(0, 0, 0); y += 5.5;
+  doc.setFont(undefined, "bold"); doc.setFontSize(8.6); doc.text("TAMBIÉN SE ME HA INFORMADO QUE:", MX2, y); doc.setFont(undefined, "normal"); doc.setTextColor(0, 0, 0); y += 5;
+  doc.setFontSize(9);
   const puntos2 = [
     "Los posibles riesgos incluyen fatiga, mareo, molestias musculares, dificultad respiratoria y, en casos excepcionales, eventos cardiovasculares.",
-    "Si presento alguna molestia o sintoma inusual, debo detenerme y comunicarlo de inmediato.",
-    "No debo realizar la prueba si estoy lesionado/a, enfermo/a, con fiebre, dolor toracico, asma no controlada, hipertension no controlada, u otra condicion medica que me impida realizar esfuerzo fisico moderado-intenso.",
+    "Si presento alguna molestia o síntoma inusual, debo detenerme y comunicarlo de inmediato.",
+    "No debo realizar la prueba si estoy lesionado/a, enfermo/a, con fiebre, dolor torácico, asma no controlada, hipertensión no controlada, u otra condición médica que me impida realizar esfuerzo físico moderado-intenso.",
   ];
-  puntos2.forEach(p => { y = escribirParrafo(doc, "•  " + p, MARGEN_X + 1, y, ANCHO_UTIL - 1, 4.6) + 1.5; });
+  puntos2.forEach((p) => { y = escribirParrafo(doc, "•  " + p, MX2 + 1, y, AU2 - 1, 4.3) + 1.3; });
+
+  y += 1.5;
+  doc.setTextColor(...PDF_VERDE_OSCURO);
+  doc.setFont(undefined, "bold"); doc.setFontSize(8.6); doc.text("TRATAMIENTO DE DATOS PERSONALES:", MX2, y); doc.setFont(undefined, "normal"); doc.setTextColor(0, 0, 0); y += 5;
+  doc.setFontSize(9);
+  const parrafoDatos1 = "Autorizo el uso de los datos personales y clínicos solicitados en este formulario exclusivamente para los fines de esta prueba: la valoración pre-test, el cálculo del VO2max y la generación de los documentos de consentimiento y reporte en formato PDF. El tratamiento de estos datos se rige por la Ley 1581 de 2012 y el Decreto 1377 de 2013, marco general de protección de datos personales en Colombia.";
+  y = escribirParrafo(doc, parrafoDatos1, MX2, y, AU2, 4.3) + 2.5;
+  const parrafoDatos2 = "Esta página funciona completamente en el navegador de quien la usa: ningún dato ingresado se envía a un servidor ni se almacena en ninguna base de datos. La información sólo está disponible en pantalla mientras dura la prueba y se pierde automáticamente al cerrar o recargar la página. Una vez generados los PDF de consentimiento y de reporte, no queda ningún dato almacenado en la página; la única copia que existe es la que se descarga en ese momento.";
+  y = escribirParrafo(doc, parrafoDatos2, MX2, y, AU2, 4.3) + 2;
 
   y += 2;
-  doc.setTextColor(...PDF_VERDE_OSCURO);
-  doc.setFont(undefined, "bold"); doc.text("Tratamiento de datos personales:", MARGEN_X, y); doc.setFont(undefined, "normal"); doc.setTextColor(0, 0, 0); y += 5.5;
-  const parrafoDatos1 = "Autorizo el uso de los datos personales y clinicos solicitados en este formulario exclusivamente para los fines de esta prueba: la valoracion pre-test, el calculo del VO2max y la generacion de los documentos de consentimiento y reporte en formato PDF. El tratamiento de estos datos se rige por la Ley 1581 de 2012 y el Decreto 1377 de 2013, marco general de proteccion de datos personales en Colombia.";
-  y = escribirParrafo(doc, parrafoDatos1, MARGEN_X, y, ANCHO_UTIL, 4.6) + 3;
-  const parrafoDatos2 = "Esta pagina funciona completamente en el navegador de quien la usa: ningun dato ingresado se envia a un servidor ni se almacena en ninguna base de datos. La informacion solo esta disponible en pantalla mientras dura la prueba y se pierde automaticamente al cerrar o recargar la pagina. Una vez generados los PDF de consentimiento y de reporte, no queda ningun dato almacenado en la pagina; la unica copia que existe es la que se descarga en ese momento.";
-  y = escribirParrafo(doc, parrafoDatos2, MARGEN_X, y, ANCHO_UTIL, 4.6) + 2;
-
-  y += 3;
-  doc.setFillColor(...PDF_VERDE_CLARO);
+  doc.setFillColor(...CREMA_D);
   doc.setDrawColor(...PDF_BORDE_CLARO);
-  const declaracion = "Declaro que he leido y comprendido la informacion anterior, que he tenido la oportunidad de hacer preguntas y que estas me han sido respondidas satisfactoriamente. Tras ello, participo de forma voluntaria y autorizo la realizacion de la prueba en las condiciones descritas.";
-  const lineasDecl = doc.splitTextToSize(declaracion, ANCHO_UTIL - 6);
-  const altoCaja = lineasDecl.length * 4.6 + 6;
-  doc.roundedRect(MARGEN_X, y, ANCHO_UTIL, altoCaja, 1.5, 1.5, "FD");
-  doc.text(lineasDecl, MARGEN_X + 3, y + 5.2);
-  y += altoCaja + 8;
-
-  doc.setFontSize(9.5);
-  doc.text(`Fecha: ${fecha}`, MARGEN_X, y); y += 6;
+  const declaracion = "Declaro que he leído y comprendido la información anterior, que he tenido la oportunidad de hacer preguntas y que éstas me han sido respondidas satisfactoriamente. Tras ello, participo de forma voluntaria y autorizo la realización de la prueba en las condiciones descritas.";
+  doc.setFontSize(9);
+  const lineasDecl = doc.splitTextToSize(declaracion, AU2 - 6);
+  const altoCaja = lineasDecl.length * 4.3 + 6;
+  doc.roundedRect(MX2, y, AU2, altoCaja, 2, 2, "FD");
+  doc.text(lineasDecl, MX2 + 3, y + 5);
+  y += altoCaja + 7;
 
   // Firma: se preserva la relación de aspecto real del canvas para no deformar el trazo.
-  const anchoFirma = 65;
+  const anchoFirma = 60;
   const altoFirma = anchoFirma * (canvas.height / canvas.width);
-  doc.addImage(canvas.toDataURL("image/png"), "PNG", MARGEN_X, y, anchoFirma, altoFirma);
-  y += altoFirma + 4;
-  doc.setDrawColor(180, 180, 180);
-  doc.setLineWidth(0.2);
-  doc.line(MARGEN_X, y, MARGEN_X + anchoFirma, y);
-  doc.setFontSize(8.3);
-  doc.setTextColor(...PDF_GRIS);
-  doc.text("Firma del participante", MARGEN_X, y + 4.5);
+  doc.addImage(canvas.toDataURL("image/png"), "PNG", MX2, y, anchoFirma, altoFirma);
+  y += altoFirma + 3;
+  doc.setDrawColor(180, 180, 180); doc.setLineWidth(0.2);
+  doc.line(MX2, y, MX2 + anchoFirma, y);
+  doc.setFontSize(7.8); doc.setTextColor(...PDF_GRIS);
+  doc.text("Firma del participante", MX2, y + 4.2);
   doc.setTextColor(0, 0, 0);
-
-  const evaluador = document.getElementById("nombreEvaluador").value || "____________________";
-  y += 14;
-  doc.setFontSize(9.5);
-  doc.text(`Nombre del evaluador/responsable: ${evaluador}`, MARGEN_X, y);
 
   doc.save("consentimiento_informado_test_milla.pdf");
 }
 
-// ---------- PDF: Reporte del test ----------
+// ---------- PDF: Reporte del test (diseño con barra lateral) ----------
 async function descargarReporte() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  let y = await encabezadoPDF(doc, "Reporte de test — Test de caminata de 1 milla");
+
+  const logoPersonal = await cargarImagenComoDataURL("mi-logo.png");
+  const dimLogo = await obtenerDimensionesImagen(logoPersonal);
 
   const val = (id) => document.getElementById(id).value || "-";
-  const sexoTexto = document.getElementById("sexo").value === "1" ? "Hombre" : (document.getElementById("sexo").value === "0" ? "Mujer" : "-");
+  const sexoVal = document.getElementById("sexo").value;
+  const sexoTexto = sexoVal === "1" ? "Hombre" : (sexoVal === "0" ? "Mujer" : "-");
 
-  y = tituloSeccionPDF(doc, "Datos personales", y);
-  y = camposEnCuadricula(doc, [
-    ["Nombre", val("nombre")], ["Edad", val("edad")],
-    ["ID", val("id")], ["Sexo", sexoTexto],
-    ["Fecha", val("fecha")], ["Examinador", val("examinador")],
-    ["Contacto de emergencia", val("contactoEmergenciaNombre")], ["Tel. de emergencia", val("contactoEmergenciaTel")],
+  dibujarSidebarD(doc, {
+    logoDataUrl: logoPersonal, dimLogo, etiquetaPersona: etiquetaEvaluado(sexoVal),
+    nombre: val("nombre"), doc_id: val("id"), edad: val("edad"), sexoTexto,
+    contactoNombre: val("contactoEmergenciaNombre"), contactoTel: val("contactoEmergenciaTel"),
+    fecha: val("fecha"), examinador: val("examinador"),
+  });
+
+  doc.setFont(undefined, "bold"); doc.setFontSize(16.5); doc.setTextColor(30, 34, 32);
+  doc.text("Reporte de test", MX2, 24);
+  doc.setFont(undefined, "normal"); doc.setFontSize(9.3); doc.setTextColor(...PDF_GRIS);
+  doc.text("Test de caminata de 1 milla — Kline y cols. (1987)", MX2, 30.5);
+  let y = 42;
+
+  y = tituloD(doc, "Antecedentes", y);
+  y = camposListaD(doc, [
+    ["Enfermedades", val("enfermedades")],
+    ["Medicamentos", val("medicamentos")],
+    ["Cirugías", val("cirugias")],
+    ["Lesiones osteomusculares", val("lesiones")],
+    ["Alergias", val("alergias")],
   ], y);
 
-  y = tituloSeccionPDF(doc, "Antecedentes", y);
-  y = camposEnCuadricula(doc, [
-    ["Enfermedades", val("enfermedades")], ["Medicamentos", val("medicamentos")],
-    ["Cirugías", val("cirugias")], ["Lesiones osteomusculares", val("lesiones")],
-    ["Alergias", val("alergias")], ["", ""],
+  y = tituloD(doc, "Examen físico", y);
+  y = camposListaD(doc, [
+    ["Peso", `${val("peso")} kg (${val("pesoLb")} lb)`],
+    ["Talla", `${val("talla")} cm`],
+    ["FC de reposo", `${val("fcReposo")} lpm`],
+    ["TA de reposo", `${val("taReposo")} mmHg`],
+    ["FC máxima calculada", `${val("fcMax")} lpm`],
   ], y);
 
-  y = tituloSeccionPDF(doc, "Examen físico", y);
-  y = camposEnCuadricula(doc, [
-    ["Peso (kg)", val("peso")], ["Peso (lb)", val("pesoLb")],
-    ["Talla (cm)", val("talla")], ["FC de reposo", val("fcReposo")],
-    ["TA de reposo", val("taReposo")], ["FC máxima calculada", val("fcMax")],
-  ], y);
-
-  y = tituloSeccionPDF(doc, "PAR-Q", y);
-  doc.setFontSize(7.8);
-  doc.setTextColor(...PDF_GRIS);
-  y = escribirParrafo(doc, "Cuestionario de aptitud para la actividad física: identifica factores de riesgo que podrían contraindicar la realización de la prueba.", MARGEN_X, y, ANCHO_UTIL, 3.6) + 3;
-  doc.setTextColor(0, 0, 0);
+  y = tituloD(doc, "PAR-Q", y);
   const respuestas = respuestasParq();
-  const positivas = respuestas.map((r, i) => ({ ...r, n: i + 1 })).filter(r => r.respuesta === "Sí");
-  const sinResponder = respuestas.filter(r => r.respuesta === "(sin responder)").length;
-  doc.setFontSize(9.2);
+  const positivas = respuestas.map((r, i) => ({ ...r, n: i + 1 })).filter((r) => r.respuesta === "Sí");
+  const sinResponder = respuestas.filter((r) => r.respuesta === "(sin responder)").length;
+  doc.setFontSize(8.6);
   if (positivas.length === 0 && sinResponder === 0) {
     doc.setTextColor(...PDF_VERDE_OSCURO);
-    y = escribirParrafo(doc, "Sin alertas: las 7 preguntas del PAR-Q fueron respondidas \"No\".", MARGEN_X, y, ANCHO_UTIL, 4.6) + 2;
+    y = escribirParrafo(doc, 'Sin alertas: las 7 preguntas fueron respondidas "No".', MX2, y, AU2, 4.4) + 3;
     doc.setTextColor(0, 0, 0);
   } else {
     if (positivas.length > 0) {
       doc.setTextColor(180, 60, 30);
       doc.setFont(undefined, "bold");
-      y = escribirParrafo(doc, `Alerta — respuesta "Sí" en ${positivas.length} pregunta(s):`, MARGEN_X, y, ANCHO_UTIL, 4.6) + 1;
+      y = escribirParrafo(doc, `Alerta — respuesta "Sí" en ${positivas.length} pregunta(s):`, MX2, y, AU2, 4.4) + 1;
       doc.setFont(undefined, "normal");
       doc.setTextColor(0, 0, 0);
-      positivas.forEach(r => { y = escribirParrafo(doc, `${r.n}) ${r.texto}`, MARGEN_X + 2, y, ANCHO_UTIL - 2, 4.4) + 1; });
+      positivas.forEach((r) => { y = escribirParrafo(doc, `${r.n}) ${r.texto}`, MX2 + 2, y, AU2 - 2, 4.2) + 1; });
       y += 1;
     }
     if (sinResponder > 0) {
-      y = escribirParrafo(doc, `${sinResponder} pregunta(s) del PAR-Q sin responder.`, MARGEN_X, y, ANCHO_UTIL, 4.6) + 1;
+      y = escribirParrafo(doc, `${sinResponder} pregunta(s) del PAR-Q sin responder.`, MX2, y, AU2, 4.4) + 1;
     }
     const negativas = 7 - positivas.length - sinResponder;
     if (negativas > 0) {
-      y = escribirParrafo(doc, `Las ${negativas} preguntas restantes fueron respondidas "No".`, MARGEN_X, y, ANCHO_UTIL, 4.6) + 1;
+      y = escribirParrafo(doc, `Las ${negativas} preguntas restantes fueron respondidas "No".`, MX2, y, AU2, 4.4) + 1;
     }
   }
   y += 2;
 
-  y = tituloSeccionPDF(doc, "Hoja de registro", y);
+  y = tituloD(doc, "Hoja de registro", y);
   const t1min = document.getElementById("t1min").value || "0";
   const t1seg = document.getElementById("t1seg").value || "0";
-  y = camposEnCuadricula(doc, [
+  y = camposListaD(doc, [
     ["Tiempo total T1", `${t1min} min ${t1seg} seg`],
-    ["FC último cuarto de milla (HR1-4)", val("hr14")],
+    ["FC último cuarto de milla (HR1-4)", `${val("hr14")} lpm`],
   ], y);
 
-  // Caja destacada con el resultado (mismo estilo que la página web).
+  // ---- Resultado: los dos valores con la misma relevancia, uno al lado del otro,          ----
+  // ---- con la etiqueta VO2max tipografiada en TeX (misma notación que las ecuaciones)      ----
   const vLmin = document.getElementById("valorLmin").textContent;
   const vRel = document.getElementById("valorRelativo").textContent;
-  doc.setFillColor(...PDF_VERDE_CLARO);
-  doc.setDrawColor(...PDF_BORDE_CLARO);
-  doc.roundedRect(MARGEN_X, y, ANCHO_UTIL, 24, 1.5, 1.5, "FD");
-  doc.setTextColor(...PDF_VERDE_OSCURO);
-  doc.setFont(undefined, "bold");
-  doc.setFontSize(9.3);
-  doc.text("Resultado — ecuación de Kline y cols. (1987)", MARGEN_X + 3, y + 5.5);
-  doc.setFontSize(12.5);
-  doc.text(`VO2max: ${vLmin} L/min   ·   VO2max relativo: ${vRel} ml/kg/min`, MARGEN_X + 3, y + 12.5);
-  doc.setFont(undefined, "normal");
-  doc.setFontSize(7.6);
-  doc.setTextColor(...PDF_GRIS);
-  doc.text("Dos ecuaciones generalizadas independientes (no una conversión de unidades): L/min SEE ±0,325, r = 0,93  ·  ml/kg/min SEE ±5,0, r = 0,88.", MARGEN_X + 3, y + 17.3);
-  doc.text("Kline y cols. (1987).", MARGEN_X + 3, y + 21.3);
-  doc.setTextColor(0, 0, 0);
-  y += 30;
+  const labelAbs = await cargarImagenComoDataURL("formula-vo2-label.png");
+  const labelRel = await cargarImagenComoDataURL("formula-vo2-label-rel.png");
+  const dimLabelAbs = await obtenerDimensionesImagen(labelAbs);
+  const dimLabelRel = await obtenerDimensionesImagen(labelRel);
 
-  y = tituloSeccionPDF(doc, "Evaluación posterior", y);
-  y = camposEnCuadricula(doc, [
-    ["FC de recuperación", val("fcRecuperacion")], ["TA de recuperación", val("taRecuperacion")],
-    ["Síntomas", val("sintomas")], ["", ""],
+  const altoBox = 40;
+  doc.setFillColor(...CREMA_D);
+  doc.roundedRect(MX2, y, AU2, altoBox, 2.5, 2.5, "F");
+  doc.setFont(undefined, "bold"); doc.setFontSize(8); doc.setTextColor(...PDF_VERDE_OSCURO);
+  doc.text("RESULTADO — ECUACIÓN DE KLINE Y COLS. (1987)", MX2 + 7, y + 8);
+
+  const mitad = AU2 / 2;
+  doc.setDrawColor(...PDF_BORDE_CLARO); doc.setLineWidth(0.3);
+  doc.line(MX2 + mitad, y + 12, MX2 + mitad, y + altoBox - 5);
+
+  const hEtiq = 6.2;
+  const wEtiqAbs = dimLabelAbs ? hEtiq * (dimLabelAbs.ancho / dimLabelAbs.alto) : hEtiq * 2.325;
+  const wEtiqRel = dimLabelRel ? hEtiq * (dimLabelRel.ancho / dimLabelRel.alto) : hEtiq * 2.325;
+
+  // Columna izquierda: VO2max absoluto
+  if (labelAbs) doc.addImage(labelAbs, "PNG", MX2 + 7, y + 10.3, wEtiqAbs, hEtiq);
+  doc.setFont(undefined, "bold"); doc.setFontSize(19); doc.setTextColor(...PDF_VERDE_OSCURO);
+  doc.text(vLmin, MX2 + 7, y + 28);
+  const wLmin = doc.getTextWidth(vLmin);
+  doc.setFont(undefined, "normal"); doc.setFontSize(8); doc.setTextColor(80, 80, 80);
+  doc.text("L/min", MX2 + 7 + wLmin + 2.5, y + 28);
+  doc.setFont(undefined, "normal"); doc.setFontSize(6.6); doc.setTextColor(...PDF_GRIS);
+  doc.text("SEE ±0,325, r = 0,93", MX2 + 7, y + 34.5);
+
+  // Columna derecha: VO2max relativo
+  const xDer = MX2 + mitad + 7;
+  if (labelRel) doc.addImage(labelRel, "PNG", xDer, y + 10.3, wEtiqRel, hEtiq);
+  doc.setFont(undefined, "bold"); doc.setFontSize(19); doc.setTextColor(...PDF_VERDE_OSCURO);
+  doc.text(vRel, xDer, y + 28);
+  const wRel = doc.getTextWidth(vRel);
+  doc.setFont(undefined, "normal"); doc.setFontSize(8); doc.setTextColor(80, 80, 80);
+  doc.text("ml/kg/min", xDer + wRel + 2.5, y + 28);
+  doc.setFont(undefined, "normal"); doc.setFontSize(6.6); doc.setTextColor(...PDF_GRIS);
+  doc.text("SEE ±5,0, r = 0,88", xDer, y + 34.5);
+
+  y += altoBox + 5;
+  doc.setTextColor(0, 0, 0);
+
+  y = tituloD(doc, "Evaluación posterior", y);
+  y = camposListaD(doc, [
+    ["FC de recuperación", `${val("fcRecuperacion")} lpm`],
+    ["TA de recuperación", `${val("taRecuperacion")} mmHg`],
+    ["Síntomas", val("sintomas")],
   ], y);
 
-  doc.setFontSize(9.2);
-  doc.setFont(undefined, "bold");
-  doc.text("Observaciones:", MARGEN_X, y);
+  doc.setFont(undefined, "bold"); doc.setFontSize(8.4); doc.setTextColor(0, 0, 0);
+  doc.text("Observaciones:", MX2, y);
   doc.setFont(undefined, "normal");
-  y = escribirParrafo(doc, val("observaciones") || "-", MARGEN_X, y + 5, ANCHO_UTIL, 4.4) + 3;
+  y = escribirParrafo(doc, val("observaciones") || "-", MX2, y + 5, AU2, 4.2) + 4;
 
-  doc.setFontSize(6.8);
-  doc.setTextColor(...PDF_GRIS);
-  escribirParrafo(doc, "Kline GM, Porcari JP, Hintermeister R, Freedson PS, Ward A, McCarron RF, Ross J, Rippe JM. Estimation of VO2max from a one-mile track walk, gender, age, and body weight. Med Sci Sports Exerc. 1987;19(3):253-9.", MARGEN_X, y, ANCHO_UTIL, 3.6);
+  doc.setFontSize(6.4); doc.setTextColor(...PDF_GRIS);
+  escribirParrafo(doc, "Kline GM, Porcari JP, Hintermeister R, Freedson PS, Ward A, McCarron RF, Ross J, Rippe JM. Estimation of VO2max from a one-mile track walk, gender, age, and body weight. Med Sci Sports Exerc. 1987;19(3):253-9.", MX2, y, AU2, 3.2);
 
   doc.save("reporte_test_milla.pdf");
 }
