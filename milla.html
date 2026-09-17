@@ -92,8 +92,21 @@
   .footer-licencia a{ color:#999; }
   .fila-checklist{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:24px; }
   .checklist-titulo{ font-weight:700; color:var(--verde-oscuro); margin:0 0 6px; }
-  ul.checklist{ margin:0; padding-left:20px; font-size:0.88rem; line-height:1.5; }
-  ul.checklist li{ margin-bottom:6px; }
+  ul.checklist{ margin:0; padding:0; list-style:none; font-size:0.88rem; line-height:1.5; }
+  ul.checklist li{ margin-bottom:2px; }
+  ul.checklist li label{
+    display:flex; align-items:flex-start; gap:9px; margin:0; font-weight:400;
+    padding:7px 8px; border-radius:6px; cursor:pointer; transition:background 0.15s;
+  }
+  ul.checklist li label:hover{ background:#f4f7f4; }
+  ul.checklist li input[type=checkbox]{
+    margin-top:3px; width:16px; height:16px; accent-color:var(--verde); flex-shrink:0; cursor:pointer;
+  }
+  ul.checklist li.marcado label{ background:#eef7f0; }
+  ul.checklist li.marcado span{
+    color:var(--verde-oscuro); font-weight:600; text-decoration:line-through;
+    text-decoration-color:var(--verde); text-decoration-thickness:1.5px;
+  }
 
   .protocolo-fab{
     position:fixed; bottom:22px; right:22px; z-index:1000;
@@ -121,9 +134,43 @@
   .protocolo-lista{ margin:12px 0 0; padding-left:20px; font-size:0.85rem; line-height:1.5; }
   .protocolo-lista li{ margin-bottom:9px; }
   .protocolo-nota{ font-size:0.74rem; color:#666; border-top:1px solid #eee; margin-top:12px; padding-top:10px; line-height:1.5; }
+
+  .cronometro-fab{
+    position:fixed; bottom:80px; right:22px; z-index:1000;
+    background:var(--verde-oscuro); color:#fff; border:none; border-radius:50px;
+    padding:12px 18px; font-size:0.88rem; font-weight:600; cursor:pointer;
+    box-shadow:0 4px 14px rgba(0,0,0,0.28); display:flex; align-items:center; gap:8px;
+  }
+  .cronometro-fab:hover{ background:#0a3128; }
+  .cronometro-fab svg{ width:18px; height:18px; fill:#fff; flex-shrink:0; }
+  .cronometro-panel{
+    position:fixed; bottom:138px; right:22px; z-index:1000;
+    width:280px; max-width:calc(100vw - 32px);
+    background:#fff; border:1px solid var(--gris-borde); border-radius:12px;
+    box-shadow:0 10px 32px rgba(0,0,0,0.22); padding:20px 22px;
+    display:none; text-align:center;
+  }
+  .cronometro-panel.abierto{ display:block; }
+  .cronometro-panel h3{ margin:0 0 2px; color:var(--verde-oscuro); font-size:1.02rem; padding-right:26px; }
+  .cronometro-panel .subt{ margin:0 0 14px; font-size:0.78rem; color:#777; font-style:italic; }
+  .cronometro-panel .cerrar{
+    position:absolute; top:12px; right:14px; background:none; border:none; font-size:1.5rem;
+    line-height:1; color:#888; cursor:pointer; padding:0;
+  }
+  .cronometro-panel .cerrar:hover{ color:#222; }
+  .crono-display{
+    font-size:2.1rem; font-weight:700; color:var(--verde-oscuro); font-variant-numeric:tabular-nums;
+    margin:0 0 16px; letter-spacing:0.02em;
+  }
+  .crono-botones{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
+  .crono-botones button{ flex:1 1 auto; padding:9px 10px; font-size:0.82rem; }
+  .crono-usar{ width:100%; }
+  .crono-nota{ font-size:0.72rem; color:#888; border-top:1px solid #eee; margin-top:12px; padding-top:10px; line-height:1.45; text-align:left; }
   @media (max-width:480px){
     .protocolo-fab span{ display:none; }
     .protocolo-fab{ padding:14px; border-radius:50%; }
+    .cronometro-fab span{ display:none; }
+    .cronometro-fab{ padding:14px; border-radius:50%; }
   }
 
   .info-btn{
@@ -191,23 +238,23 @@
       <div>
         <p class="checklist-titulo">Para el examinador</p>
         <ul class="checklist">
-          <li>Superficie plana y medida de 1 milla (1609 m): pista atlética de 400 m (4 vueltas + 9 m) o ruta medida con GPS/rueda de medición.</li>
-          <li>Cronómetro.</li>
-          <li>Pulsómetro, o método confiable para palpación manual del pulso.</li>
-          <li>Báscula y tallímetro (si no se cuenta con datos previos).</li>
-          <li>Tensiómetro.</li>
-          <li>Este formulario a mano (computador, tablet o celular) para diligenciar y descargar los PDF.</li>
-          <li>Plan de respuesta ante evento adverso y datos de contacto de emergencia.</li>
+          <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Superficie plana y medida de 1 milla (1609 m): pista atlética de 400 m (4 vueltas + 9 m) o ruta medida con GPS/rueda de medición.</span></label></li>
+          <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Cronómetro.</span></label></li>
+          <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Pulsómetro, o método confiable para palpación manual del pulso.</span></label></li>
+          <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Báscula y tallímetro (si no se cuenta con datos previos).</span></label></li>
+          <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Tensiómetro.</span></label></li>
+          <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Este formulario a mano (computador, tablet o celular) para diligenciar y descargar los PDF.</span></label></li>
+          <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Plan de respuesta ante evento adverso y datos de contacto de emergencia.</span></label></li>
         </ul>
       </div>
       <div>
         <p class="checklist-titulo">Para el paciente/participante</p>
         <ul class="checklist">
-          <li>Ropa y calzado cómodos para caminar a paso rápido.</li>
-          <li>Evitar comida copiosa, exceso de cafeína o ejercicio intenso en las horas previas a la prueba.</li>
-          <li>Hidratación adecuada antes de iniciar.</li>
-          <li>Informar antecedentes médicos relevantes antes de comenzar.</li>
-          <li>No presentar signos de alarma el día de la prueba (fiebre, dolor torácico, mareo, lesión aguda, etc. — ver PAR-Q).</li>
+          <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Ropa y calzado cómodos para caminar a paso rápido.</span></label></li>
+          <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Evitar comida copiosa, exceso de cafeína o ejercicio intenso en las horas previas a la prueba.</span></label></li>
+          <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Hidratación adecuada antes de iniciar.</span></label></li>
+          <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Informar antecedentes médicos relevantes antes de comenzar.</span></label></li>
+          <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>No presentar signos de alarma el día de la prueba (fiebre, dolor torácico, mareo, lesión aguda, etc. — ver PAR-Q).</span></label></li>
         </ul>
       </div>
     </div>
@@ -311,7 +358,6 @@
 
     <div style="margin-top:18px;">
       <button type="button" onclick="descargarConsentimiento()">Descargar consentimiento informado (PDF)</button>
-      <div class="nota-pdf">El logo y la firma solo se incrustan correctamente en el PDF cuando la página está publicada en GitHub Pages (no al abrir el archivo directamente en su computador).</div>
     </div>
   </section>
 
@@ -361,6 +407,24 @@
   </section>
 </main>
 
+<button type="button" class="cronometro-fab" id="cronometroFab" onclick="toggleCronometro()" aria-expanded="false" aria-controls="cronometroPanel">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61 1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42A8.962 8.962 0 0 0 12 4c-4.97 0-9 4.03-9 9s4.02 9 9 9a9 9 0 0 0 6.03-15.61zM12 20c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
+  <span>Cronómetro</span>
+</button>
+
+<div class="cronometro-panel" id="cronometroPanel">
+  <button type="button" class="cerrar" onclick="toggleCronometro()" aria-label="Cerrar">&times;</button>
+  <h3>Cronómetro</h3>
+  <p class="subt">Cronometraje del tiempo total T1</p>
+  <div class="crono-display" id="cronoDisplay">00:00.0</div>
+  <div class="crono-botones">
+    <button type="button" id="cronoIniciarPausar" onclick="alternarCrono()">Iniciar</button>
+    <button type="button" class="secundario" onclick="reiniciarCrono()">Reiniciar</button>
+  </div>
+  <button type="button" class="crono-usar" onclick="usarTiempoCrono()">Usar este tiempo en T1</button>
+  <p class="crono-nota">Registra el tiempo aquí y transfiéralo al campo "Tiempo total T1" de la hoja de registro. El valor transferido siempre puede corregirse manualmente en ese campo.</p>
+</div>
+
 <button type="button" class="protocolo-fab" id="protocoloFab" onclick="toggleProtocolo()" aria-expanded="false" aria-controls="protocoloPanel">
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 2a1 1 0 0 0-1 1v1H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V3a1 1 0 0 0-1-1H9zm0 2h6v2H9V4zM6 6h2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1h2v14H6V6zm2.5 4.5 1.5 1.5 3.5-3.5 1.4 1.4L10 15.3l-2.9-2.9 1.4-1.4z"/></svg>
   <span>Protocolo</span>
@@ -376,7 +440,6 @@
     <li>Tomar medidas basales: peso, talla, FC y TA en reposo.</li>
     <li>Explicar la consigna: caminar la milla lo más rápido posible, sin trotar ni correr, manteniendo el esfuerzo sostenido durante todo el recorrido.</li>
     <li>Iniciar el cronómetro en el momento en que el participante comienza a caminar.</li>
-    <li>Si se cuenta con monitoreo continuo de FC, registrarla al llegar a cada cuarto de milla (opcional; ver nota).</li>
     <li>Al completar la milla, detener el cronómetro (T1) y registrar de inmediato la frecuencia cardíaca del último cuarto de milla (HR1-4).</li>
     <li>Realizar la evaluación posterior: FC y TA de recuperación, e indagar síntomas.</li>
     <li>Calcular el VO₂máx con la ecuación de Kline y cols. (1987), usando peso, edad, sexo, T1 y HR1-4.</li>
@@ -473,6 +536,77 @@ document.addEventListener("click", (e) => {
     fab.setAttribute("aria-expanded", "false");
   }
 });
+
+// ---------- Lista de chequeo ----------
+function toggleChecklistItem(checkbox) {
+  checkbox.closest("li").classList.toggle("marcado", checkbox.checked);
+}
+
+// ---------- Cronómetro flotante ----------
+function toggleCronometro() {
+  const panel = document.getElementById("cronometroPanel");
+  const abierto = panel.classList.toggle("abierto");
+  document.getElementById("cronometroFab").setAttribute("aria-expanded", abierto ? "true" : "false");
+}
+document.addEventListener("click", (e) => {
+  const panel = document.getElementById("cronometroPanel");
+  const fab = document.getElementById("cronometroFab");
+  if (panel.classList.contains("abierto") && !panel.contains(e.target) && !fab.contains(e.target)) {
+    panel.classList.remove("abierto");
+    fab.setAttribute("aria-expanded", "false");
+  }
+});
+
+let cronoCorriendo = false;
+let cronoInicioMs = 0;
+let cronoAcumuladoMs = 0;
+let cronoIntervalo = null;
+
+function formatearCrono(ms) {
+  const totalDecimas = Math.floor(ms / 100);
+  const min = Math.floor(totalDecimas / 600);
+  const seg = Math.floor((totalDecimas % 600) / 10);
+  const decimas = totalDecimas % 10;
+  return `${String(min).padStart(2, "0")}:${String(seg).padStart(2, "0")}.${decimas}`;
+}
+
+function cronoMsActual() {
+  return cronoCorriendo ? (Date.now() - cronoInicioMs + cronoAcumuladoMs) : cronoAcumuladoMs;
+}
+
+function actualizarCronoDisplay() {
+  document.getElementById("cronoDisplay").textContent = formatearCrono(cronoMsActual());
+}
+
+function alternarCrono() {
+  const boton = document.getElementById("cronoIniciarPausar");
+  if (!cronoCorriendo) {
+    cronoInicioMs = Date.now();
+    cronoCorriendo = true;
+    cronoIntervalo = setInterval(actualizarCronoDisplay, 100);
+    boton.textContent = "Pausar";
+  } else {
+    cronoAcumuladoMs += Date.now() - cronoInicioMs;
+    cronoCorriendo = false;
+    clearInterval(cronoIntervalo);
+    boton.textContent = "Reanudar";
+  }
+  actualizarCronoDisplay();
+}
+
+function reiniciarCrono() {
+  clearInterval(cronoIntervalo);
+  cronoCorriendo = false;
+  cronoAcumuladoMs = 0;
+  document.getElementById("cronoIniciarPausar").textContent = "Iniciar";
+  actualizarCronoDisplay();
+}
+
+function usarTiempoCrono() {
+  const totalSeg = Math.floor(cronoMsActual() / 1000);
+  document.getElementById("t1min").value = Math.floor(totalSeg / 60);
+  document.getElementById("t1seg").value = totalSeg % 60;
+}
 
 // ---------- PAR-Q ----------
 const preguntasParq = [
