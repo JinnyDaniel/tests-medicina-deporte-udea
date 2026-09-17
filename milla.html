@@ -73,6 +73,16 @@
   button.secundario{ background:#888; }
   button:disabled{ background:#b7bab6; cursor:not-allowed; }
   .checkbox-consent{ display:flex; gap:8px; align-items:flex-start; margin-top:16px; font-size:0.88rem; }
+  .privacidad-box{
+    background:#eef7f0; border:1px solid #cfe8d7; border-left:4px solid var(--verde);
+    border-radius:8px; padding:14px 16px; margin-top:18px;
+  }
+  .privacidad-titulo{
+    margin:0 0 8px; font-weight:700; font-size:0.72rem; color:var(--verde-oscuro);
+    text-transform:uppercase; letter-spacing:0.04em;
+  }
+  .privacidad-box p{ margin:0 0 8px; font-size:0.86rem; line-height:1.55; }
+  .privacidad-box p:last-child{ margin-bottom:0; }
   .resultado{ margin-top:18px; padding:16px; background:#eef7f0; border:1px solid #cfe8d7; border-radius:8px; display:none; }
   .resultado .valor{ font-size:1.4rem; font-weight:700; color:var(--verde-oscuro); }
   .nota-metodo{ font-size:0.78rem; color:#666; margin-top:6px; }
@@ -338,6 +348,12 @@
         <li>No debo realizar la prueba si estoy lesionado/a, enfermo/a, con fiebre, dolor torácico, asma no controlada, hipertensión no controlada, u otra condición médica que me impida realizar esfuerzo físico moderado-intenso.</li>
       </ul>
       <p>Declaro que he leído y comprendido la información anterior, que he tenido la oportunidad de hacer preguntas y que estas me han sido respondidas satisfactoriamente. Tras ello, participo de forma voluntaria y autorizo la realización de la prueba en las condiciones descritas.</p>
+    </div>
+
+    <div class="privacidad-box">
+      <p class="privacidad-titulo">Tratamiento de datos personales</p>
+      <p>Autorizo el uso de los datos personales y clínicos solicitados en este formulario exclusivamente para los fines de esta prueba: la valoración pre-test, el cálculo del VO₂máx y la generación de los documentos de consentimiento y reporte en formato PDF. El tratamiento de estos datos se rige por la Ley 1581 de 2012 y el Decreto 1377 de 2013, marco general de protección de datos personales en Colombia.</p>
+      <p>Esta página funciona completamente en el navegador de quien la usa: ningún dato ingresado se envía a un servidor ni se almacena en ninguna base de datos. La información solo está disponible en pantalla mientras dura la prueba y se pierde automáticamente al cerrar o recargar la página. Una vez generados los PDF de consentimiento y de reporte, no queda ningún dato almacenado en la página; la única copia que existe es la que se descarga en ese momento.</p>
     </div>
 
     <div class="checkbox-consent">
@@ -887,6 +903,14 @@ async function descargarConsentimiento() {
     "No debo realizar la prueba si estoy lesionado/a, enfermo/a, con fiebre, dolor toracico, asma no controlada, hipertension no controlada, u otra condicion medica que me impida realizar esfuerzo fisico moderado-intenso.",
   ];
   puntos2.forEach(p => { y = escribirParrafo(doc, "•  " + p, MARGEN_X + 1, y, ANCHO_UTIL - 1, 4.6) + 1.5; });
+
+  y += 2;
+  doc.setTextColor(...PDF_VERDE_OSCURO);
+  doc.setFont(undefined, "bold"); doc.text("Tratamiento de datos personales:", MARGEN_X, y); doc.setFont(undefined, "normal"); doc.setTextColor(0, 0, 0); y += 5.5;
+  const parrafoDatos1 = "Autorizo el uso de los datos personales y clinicos solicitados en este formulario exclusivamente para los fines de esta prueba: la valoracion pre-test, el calculo del VO2max y la generacion de los documentos de consentimiento y reporte en formato PDF. El tratamiento de estos datos se rige por la Ley 1581 de 2012 y el Decreto 1377 de 2013, marco general de proteccion de datos personales en Colombia.";
+  y = escribirParrafo(doc, parrafoDatos1, MARGEN_X, y, ANCHO_UTIL, 4.6) + 3;
+  const parrafoDatos2 = "Esta pagina funciona completamente en el navegador de quien la usa: ningun dato ingresado se envia a un servidor ni se almacena en ninguna base de datos. La informacion solo esta disponible en pantalla mientras dura la prueba y se pierde automaticamente al cerrar o recargar la pagina. Una vez generados los PDF de consentimiento y de reporte, no queda ningun dato almacenado en la pagina; la unica copia que existe es la que se descarga en ese momento.";
+  y = escribirParrafo(doc, parrafoDatos2, MARGEN_X, y, ANCHO_UTIL, 4.6) + 2;
 
   y += 3;
   doc.setFillColor(...PDF_VERDE_CLARO);
