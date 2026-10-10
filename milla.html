@@ -282,6 +282,12 @@
   <section class="bloque">
     <h2>2. Valoración pre-test</h2>
     <div class="fila">
+      <div><label>¿Quién realiza el test?</label>
+        <select id="quienRealiza" onchange="actualizarQuienRealiza()">
+          <option value="yo">Yo (Dr. Daniel Salcedo P.)</option>
+          <option value="otro">Otra persona</option>
+        </select>
+      </div>
       <div><label>Fecha</label><input type="text" id="fecha"></div>
       <div><label>Hora</label><input type="text" id="hora"></div>
       <div><label>Examinador</label><input type="text" id="examinador"></div>
@@ -326,7 +332,7 @@
     <div class="fila">
       <div><label>FC de reposo (lpm)</label><input type="number" id="fcReposo" min="30" max="150"></div>
       <div><label>TA de reposo (mmHg)</label><input type="text" id="taReposo"></div>
-      <div><label>FC máxima calculada¹ (220 − edad) <button type="button" class="info-btn" data-tip="fcmax" aria-label="Definición">?</button></label><input type="text" id="fcMax" disabled></div>
+      <div><label>FC máxima calculada¹ (208 − 0,7 × edad) <button type="button" class="info-btn" data-tip="fcmax" aria-label="Definición">?</button></label><input type="text" id="fcMax" disabled></div>
     </div>
   </section>
 
@@ -434,7 +440,7 @@
     </div>
 
     <div class="cita">
-      ¹ Fox SM 3rd, Naughton JP, Haskell WL. Physical activity and the prevention of coronary heart disease. Ann Clin Res. 1971 Dec;3(6):404-32. PMID: 4945367.<br>
+      ¹ Tanaka H, Monahan KD, Seals DR. Age-predicted maximal heart rate revisited. J Am Coll Cardiol. 2001 Jan;37(1):153-6. PMID: 11153730.<br>
       ² Kline GM, Porcari JP, Hintermeister R, Freedson PS, Ward A, McCarron RF, Ross J, Rippe JM. Estimation of VO2max from a one-mile track walk, gender, age, and body weight. Med Sci Sports Exerc. 1987;19(3):253-9.
     </div>
   </section>
@@ -519,11 +525,27 @@
   document.getElementById("hora").value = `${horas}:${minutos} ${ampm}`;
 })();
 
+// ---------- ¿Quién realiza el test? (autocompleta examinador y habilita firma/sello) ----------
+const NOMBRE_EXAMINADOR_PROPIO = "Dr. Daniel Salcedo P.";
+function actualizarQuienRealiza() {
+  const quien = document.getElementById("quienRealiza").value;
+  const elExaminador = document.getElementById("examinador");
+  const elEvaluador = document.getElementById("nombreEvaluador");
+  if (quien === "yo") {
+    elExaminador.value = NOMBRE_EXAMINADOR_PROPIO;
+    if (elEvaluador) elEvaluador.value = NOMBRE_EXAMINADOR_PROPIO;
+  } else {
+    elExaminador.value = "";
+    if (elEvaluador) elEvaluador.value = "";
+  }
+}
+actualizarQuienRealiza();
+
 // ---------- Tooltips de definición ("?") ----------
 const DEFINICIONES_CAMPO = {
   t1: "Tiempo total transcurrido en caminar la milla completa (1609 m).",
   hr14: "Promedio de las dos últimas lecturas de frecuencia cardíaca de 1 minuto (monitoreo continuo) al llegar al último cuarto de milla. Una lectura puntual única al finalizar es una aproximación práctica a este método.",
-  fcmax: "El artículo emplea la frecuencia cardíaca máxima edad-predicha como uno de los criterios para confirmar el esfuerzo máximo real en su propio protocolo de banda, sin especificar una fórmula propia para calcularla. Aquí se aplica la convención estándar de la época: 220 − edad (Fox y cols., 1971).",
+  fcmax: "El artículo emplea la frecuencia cardíaca máxima edad-predicha como uno de los criterios para confirmar el esfuerzo máximo real en su propio protocolo de banda, sin especificar una fórmula propia para calcularla. Aquí se aplica la ecuación de Tanaka, Monahan y Seals (2001): 208 − 0,7 × edad, derivada de un metaanálisis de ~18.700 sujetos que corrige el sesgo sistemático de la fórmula clásica de Fox y cols. (1971, 220 − edad), la cual sobreestima la FCmáx en personas jóvenes y la subestima en mayores de ~40-45 años.",
   vo2max: "SEE (error estándar de estimación): diferencia típica, en L/min, entre el VO2máx que predice esta ecuación y el VO2máx medido directamente por prueba de esfuerzo en el grupo de validación de Kline y cols. (1987); a menor SEE, mayor precisión de la estimación. r: coeficiente de correlación de Pearson entre el valor estimado y el medido en ese grupo (máximo 1); indica qué tan fuerte es esa asociación, no la magnitud del error.",
   vo2maxrel: "SEE (error estándar de estimación): diferencia típica, en ml·kg⁻¹·min⁻¹, entre el VO2máx relativo que predice esta ecuación —ajustada de forma independiente, no una conversión de la ecuación en L/min— y el valor medido directamente en el grupo de validación de Kline y cols. (1987); a menor SEE, mayor precisión. r: coeficiente de correlación de Pearson entre el valor estimado y el medido en ese grupo (máximo 1).",
 };
@@ -690,7 +712,7 @@ function actualizarPesoLb() {
 }
 document.getElementById("edad").addEventListener("input", () => {
   const edad = parseFloat(document.getElementById("edad").value);
-  document.getElementById("fcMax").value = isFinite(edad) ? (220 - edad).toFixed(0) : "";
+  document.getElementById("fcMax").value = isFinite(edad) ? (208 - 0.7 * edad).toFixed(0) : "";
 });
 
 // ---------- Firma digital (canvas) ----------
@@ -913,7 +935,7 @@ function etiquetaEvaluado(sexoVal) {
   return sexoVal === "1" ? "Evaluado" : (sexoVal === "0" ? "Evaluada" : "Evaluado/a");
 }
 
-function dibujarSidebarD(doc, { logoDataUrl, dimLogo, etiquetaPersona, nombre, doc_id, edad, sexoTexto, contactoNombre, contactoTel, fecha, examinador }) {
+function dibujarSidebarD(doc, { logoDataUrl, dimLogo, etiquetaPersona, nombre, doc_id, edad, sexoTexto, contactoNombre, contactoTel, fecha, examinador, firmaSelloDataUrl, dimFirmaSello }) {
   doc.setFillColor(...VERDE_CLARO_SIDEBAR);
   doc.rect(0, 0, SW, 297, "F");
   doc.setDrawColor(...BORDE_SIDEBAR); doc.setLineWidth(0.6);
@@ -948,6 +970,15 @@ function dibujarSidebarD(doc, { logoDataUrl, dimLogo, etiquetaPersona, nombre, d
   sy += 5;
   etiqueta("Examinador");
   lineas([examinador], 8.6, NEGRO_SIDEBAR);
+
+  if (firmaSelloDataUrl) {
+    sy += 6;
+    etiqueta("Firma y sello");
+    const anchoFirma = 40;
+    const altoFirma = dimFirmaSello ? anchoFirma * (dimFirmaSello.alto / dimFirmaSello.ancho) : anchoFirma * (308 / 745);
+    doc.addImage(firmaSelloDataUrl, "PNG", 9, sy, anchoFirma, altoFirma);
+    sy += altoFirma + 2;
+  }
 
   doc.setDrawColor(...BORDE_SIDEBAR); doc.setLineWidth(0.15);
   doc.line(9, 262, SW - 9, 262);
@@ -1080,6 +1111,13 @@ async function descargarConsentimiento() {
   const logoPersonal = await cargarImagenComoDataURL("mi-logo.png");
   const dimLogo = await obtenerDimensionesImagen(logoPersonal);
 
+  const esPropio = document.getElementById("quienRealiza").value === "yo";
+  let firmaSelloDataUrl = null, dimFirmaSello = null;
+  if (esPropio) {
+    firmaSelloDataUrl = await cargarImagenComoDataURL("firma-sello.png");
+    dimFirmaSello = await obtenerDimensionesImagen(firmaSelloDataUrl);
+  }
+
   const nombre = document.getElementById("nombre").value || "____________________";
   const idParticipante = document.getElementById("id").value || "____________________";
   const fecha = document.getElementById("fecha").value || new Date().toLocaleDateString();
@@ -1092,7 +1130,7 @@ async function descargarConsentimiento() {
     nombre, doc_id: idParticipante, edad: document.getElementById("edad").value || "-", sexoTexto,
     contactoNombre: document.getElementById("contactoEmergenciaNombre").value,
     contactoTel: document.getElementById("contactoEmergenciaTel").value,
-    fecha, examinador: evaluador,
+    fecha, examinador: evaluador, firmaSelloDataUrl, dimFirmaSello,
   });
 
   doc.setFont(undefined, "bold"); doc.setFontSize(16.5); doc.setTextColor(30, 34, 32);
@@ -1170,6 +1208,13 @@ async function descargarReporte() {
   const logoPersonal = await cargarImagenComoDataURL("mi-logo.png");
   const dimLogo = await obtenerDimensionesImagen(logoPersonal);
 
+  const esPropio = document.getElementById("quienRealiza").value === "yo";
+  let firmaSelloDataUrl = null, dimFirmaSello = null;
+  if (esPropio) {
+    firmaSelloDataUrl = await cargarImagenComoDataURL("firma-sello.png");
+    dimFirmaSello = await obtenerDimensionesImagen(firmaSelloDataUrl);
+  }
+
   const val = (id) => document.getElementById(id).value || "-";
   const sexoVal = document.getElementById("sexo").value;
   const sexoTexto = sexoVal === "1" ? "Hombre" : (sexoVal === "0" ? "Mujer" : "-");
@@ -1178,7 +1223,7 @@ async function descargarReporte() {
     logoDataUrl: logoPersonal, dimLogo, etiquetaPersona: etiquetaEvaluado(sexoVal),
     nombre: val("nombre"), doc_id: val("id"), edad: val("edad"), sexoTexto,
     contactoNombre: val("contactoEmergenciaNombre"), contactoTel: val("contactoEmergenciaTel"),
-    fecha: val("fecha"), examinador: val("examinador"),
+    fecha: val("fecha"), examinador: val("examinador"), firmaSelloDataUrl, dimFirmaSello,
   });
 
   doc.setFont(undefined, "bold"); doc.setFontSize(16.5); doc.setTextColor(30, 34, 32);
