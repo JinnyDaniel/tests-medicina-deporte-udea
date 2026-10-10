@@ -64,7 +64,7 @@
   .texto-consentimiento{ font-size:0.9rem; line-height:1.5; }
   .texto-consentimiento li{ margin-bottom:8px; }
   .firma-wrap{ margin-top:16px; }
-  canvas#firmaCanvas{ border:1px dashed #999; border-radius:8px; width:100%; height:150px; touch-action:none; background:#fff; }
+  canvas#firmaCanvas, canvas#firmaExaminadorCanvas{ border:1px dashed #999; border-radius:8px; width:100%; height:150px; touch-action:none; background:#fff; }
   .firma-botones{ margin-top:8px; display:flex; gap:10px; }
   button, .btn{
     background:var(--verde); color:#fff; border:none; padding:10px 16px; border-radius:6px;
@@ -291,6 +291,16 @@
       <div><label>Fecha</label><input type="text" id="fecha"></div>
       <div><label>Hora</label><input type="text" id="hora"></div>
       <div><label>Examinador</label><input type="text" id="examinador"></div>
+    </div>
+
+    <div id="bloqueFirmaExaminadorOtro" class="firma-wrap" style="display:none;">
+      <label>Firma del examinador (dibuje con el mouse o el dedo)</label>
+      <canvas id="firmaExaminadorCanvas"></canvas>
+      <div class="firma-botones">
+        <button type="button" class="secundario" onclick="limpiarFirmaExaminador()">Limpiar firma</button>
+      </div>
+      <label style="margin-top:12px;">Registro médico (RM) del examinador</label>
+      <input type="text" id="registroMedicoExaminador" placeholder="Ej. RM 1234567">
     </div>
 
     <label>Nombre del participante</label>
@@ -531,12 +541,16 @@ function actualizarQuienRealiza() {
   const quien = document.getElementById("quienRealiza").value;
   const elExaminador = document.getElementById("examinador");
   const elEvaluador = document.getElementById("nombreEvaluador");
+  const bloqueOtro = document.getElementById("bloqueFirmaExaminadorOtro");
   if (quien === "yo") {
     elExaminador.value = NOMBRE_EXAMINADOR_PROPIO;
     if (elEvaluador) elEvaluador.value = NOMBRE_EXAMINADOR_PROPIO;
+    if (bloqueOtro) bloqueOtro.style.display = "none";
   } else {
     elExaminador.value = "";
     if (elEvaluador) elEvaluador.value = "";
+    if (bloqueOtro) bloqueOtro.style.display = "block";
+    if (typeof ajustarCanvasExaminador === "function") ajustarCanvasExaminador();
   }
 }
 actualizarQuienRealiza();
@@ -768,6 +782,56 @@ function firmaEstaVacia() {
   return canvas.toDataURL() === blanco.toDataURL();
 }
 
+// ---------- Firma digital del examinador (cuando "¿Quién realiza el test?" = Otro) ----------
+const canvasExaminador = document.getElementById("firmaExaminadorCanvas");
+const ctxExaminador = canvasExaminador.getContext("2d");
+function firmaExaminadorEstaVaciaSinGuardia() {
+  const blanco = document.createElement("canvas");
+  blanco.width = canvasExaminador.width; blanco.height = canvasExaminador.height;
+  return canvasExaminador.toDataURL() === blanco.toDataURL();
+}
+function ajustarCanvasExaminador() {
+  const previa = (canvasExaminador.width && canvasExaminador.height && !firmaExaminadorEstaVaciaSinGuardia()) ? canvasExaminador.toDataURL() : null;
+  const ratio = window.devicePixelRatio || 1;
+  const rect = canvasExaminador.getBoundingClientRect();
+  canvasExaminador.width = rect.width * ratio;
+  canvasExaminador.height = rect.height * ratio;
+  ctxExaminador.scale(ratio, ratio);
+  ctxExaminador.lineWidth = 2;
+  ctxExaminador.lineCap = "round";
+  ctxExaminador.strokeStyle = "#111";
+  if (previa) {
+    const img = new Image();
+    img.onload = () => ctxExaminador.drawImage(img, 0, 0, rect.width, rect.height);
+    img.src = previa;
+  }
+}
+window.addEventListener("resize", ajustarCanvasExaminador);
+ajustarCanvasExaminador();
+
+let dibujandoExaminador = false;
+function posicionExaminador(e) {
+  const rect = canvasExaminador.getBoundingClientRect();
+  const punto = e.touches ? e.touches[0] : e;
+  return { x: punto.clientX - rect.left, y: punto.clientY - rect.top };
+}
+function iniciarExaminador(e) { dibujandoExaminador = true; const p = posicionExaminador(e); ctxExaminador.beginPath(); ctxExaminador.moveTo(p.x, p.y); e.preventDefault(); }
+function moverExaminador(e) { if (!dibujandoExaminador) return; const p = posicionExaminador(e); ctxExaminador.lineTo(p.x, p.y); ctxExaminador.stroke(); e.preventDefault(); }
+function terminarExaminador() { dibujandoExaminador = false; }
+canvasExaminador.addEventListener("mousedown", iniciarExaminador);
+canvasExaminador.addEventListener("mousemove", moverExaminador);
+window.addEventListener("mouseup", terminarExaminador);
+canvasExaminador.addEventListener("touchstart", iniciarExaminador, { passive: false });
+canvasExaminador.addEventListener("touchmove", moverExaminador, { passive: false });
+canvasExaminador.addEventListener("touchend", terminarExaminador);
+
+function limpiarFirmaExaminador() { ctxExaminador.clearRect(0, 0, canvasExaminador.width, canvasExaminador.height); }
+function firmaExaminadorEstaVacia() {
+  const blanco = document.createElement("canvas");
+  blanco.width = canvasExaminador.width; blanco.height = canvasExaminador.height;
+  return canvasExaminador.toDataURL() === blanco.toDataURL();
+}
+
 // ---------- Verificación de datos razonables ----------
 // Rangos amplios de plausibilidad clínica: no imponen los criterios de elegibilidad del
 // estudio original (p. ej. edad 30-69 años en Kline y cols.), solo evitan valores absurdos
@@ -935,7 +999,7 @@ function etiquetaEvaluado(sexoVal) {
   return sexoVal === "1" ? "Evaluado" : (sexoVal === "0" ? "Evaluada" : "Evaluado/a");
 }
 
-function dibujarSidebarD(doc, { logoDataUrl, dimLogo, etiquetaPersona, nombre, doc_id, edad, sexoTexto, contactoNombre, contactoTel, fecha, examinador, firmaSelloDataUrl, dimFirmaSello }) {
+function dibujarSidebarD(doc, { logoDataUrl, dimLogo, etiquetaPersona, nombre, doc_id, edad, sexoTexto, contactoNombre, contactoTel, fecha, examinador }) {
   doc.setFillColor(...VERDE_CLARO_SIDEBAR);
   doc.rect(0, 0, SW, 297, "F");
   doc.setDrawColor(...BORDE_SIDEBAR); doc.setLineWidth(0.6);
@@ -1086,6 +1150,26 @@ function escribirParrafo(doc, texto, x, y, maxAncho, alturaLinea) {
 }
 
 // ---------- PDF: Consentimiento informado (diseño con barra lateral) ----------
+// Firma (y sello/RM) del examinador para los PDF: la imagen de Daniel si él mismo hace el
+// test, o la firma dibujada + registro médico ingresados cuando lo hace otra persona.
+async function obtenerFirmaExaminadorPdf() {
+  const esPropio = document.getElementById("quienRealiza").value === "yo";
+  if (esPropio) {
+    const dataUrl = await cargarImagenComoDataURL("firma-sello.png");
+    const dim = await obtenerDimensionesImagen(dataUrl);
+    return { dataUrl, ratio: dim.alto / dim.ancho, registroMedico: null, esPropio: true };
+  }
+  const registroMedico = (document.getElementById("registroMedicoExaminador").value || "").trim();
+  if (firmaExaminadorEstaVacia()) {
+    return { dataUrl: null, ratio: null, registroMedico, esPropio: false };
+  }
+  return {
+    dataUrl: canvasExaminador.toDataURL("image/png"),
+    ratio: canvasExaminador.height / canvasExaminador.width,
+    registroMedico, esPropio: false,
+  };
+}
+
 async function descargarConsentimiento() {
   if (!validarDatosRazonables()) return;
   if (!document.getElementById("aceptoConsent").checked) {
@@ -1096,18 +1180,17 @@ async function descargarConsentimiento() {
     alert("Falta la firma del participante.");
     return;
   }
+  if (document.getElementById("quienRealiza").value === "otro" && firmaExaminadorEstaVacia()) {
+    alert("Falta la firma del examinador.");
+    return;
+  }
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
   const logoPersonal = await cargarImagenComoDataURL("mi-logo.png");
   const dimLogo = await obtenerDimensionesImagen(logoPersonal);
 
-  const esPropio = document.getElementById("quienRealiza").value === "yo";
-  let firmaSelloDataUrl = null, dimFirmaSello = null;
-  if (esPropio) {
-    firmaSelloDataUrl = await cargarImagenComoDataURL("firma-sello.png");
-    dimFirmaSello = await obtenerDimensionesImagen(firmaSelloDataUrl);
-  }
+  const firmaExaminador = await obtenerFirmaExaminadorPdf();
 
   const nombre = document.getElementById("nombre").value || "____________________";
   const idParticipante = document.getElementById("id").value || "____________________";
@@ -1121,7 +1204,7 @@ async function descargarConsentimiento() {
     nombre, doc_id: idParticipante, edad: document.getElementById("edad").value || "-", sexoTexto,
     contactoNombre: document.getElementById("contactoEmergenciaNombre").value,
     contactoTel: document.getElementById("contactoEmergenciaTel").value,
-    fecha, examinador: evaluador, firmaSelloDataUrl, dimFirmaSello,
+    fecha, examinador: evaluador,
   });
 
   doc.setFont(undefined, "bold"); doc.setFontSize(16.5); doc.setTextColor(30, 34, 32);
@@ -1181,13 +1264,13 @@ async function descargarConsentimiento() {
   const altoFirmaP = anchoFirmaP * (canvas.height / canvas.width);
   doc.addImage(canvas.toDataURL("image/png"), "PNG", MX2, y, anchoFirmaP, altoFirmaP);
 
-  // Firma y sello del examinador, al lado de la del participante (solo si se cargó).
+  // Firma (y sello, si aplica) del examinador, al lado de la del participante (solo si se cargó).
   const xExaminador = MX2 + 70;
   const anchoFirmaE = 45;
   let altoFirmaE = 0;
-  if (firmaSelloDataUrl) {
-    altoFirmaE = anchoFirmaE * ((dimFirmaSello ? dimFirmaSello.alto / dimFirmaSello.ancho : 308 / 745));
-    doc.addImage(firmaSelloDataUrl, "PNG", xExaminador, y, anchoFirmaE, altoFirmaE);
+  if (firmaExaminador.dataUrl) {
+    altoFirmaE = anchoFirmaE * (firmaExaminador.ratio || (308 / 745));
+    doc.addImage(firmaExaminador.dataUrl, "PNG", xExaminador, y, anchoFirmaE, altoFirmaE);
   }
 
   y += Math.max(altoFirmaP, altoFirmaE) + 3;
@@ -1195,9 +1278,13 @@ async function descargarConsentimiento() {
   doc.line(MX2, y, MX2 + anchoFirmaP, y);
   doc.setFontSize(7.8); doc.setTextColor(...PDF_GRIS);
   doc.text("Firma del participante", MX2, y + 4.2);
-  if (firmaSelloDataUrl) {
+  if (firmaExaminador.dataUrl) {
     doc.line(xExaminador, y, xExaminador + anchoFirmaE, y);
-    doc.text("Firma y sello del examinador", xExaminador, y + 4.2);
+    doc.text(firmaExaminador.esPropio ? "Firma y sello del examinador" : "Firma del examinador", xExaminador, y + 4.2);
+    if (!firmaExaminador.esPropio && firmaExaminador.registroMedico) {
+      doc.setFontSize(7.2);
+      doc.text(`Registro médico: ${firmaExaminador.registroMedico}`, xExaminador, y + 8.4);
+    }
   }
   doc.setTextColor(0, 0, 0);
 
@@ -1213,12 +1300,7 @@ async function descargarReporte() {
   const logoPersonal = await cargarImagenComoDataURL("mi-logo.png");
   const dimLogo = await obtenerDimensionesImagen(logoPersonal);
 
-  const esPropio = document.getElementById("quienRealiza").value === "yo";
-  let firmaSelloDataUrl = null, dimFirmaSello = null;
-  if (esPropio) {
-    firmaSelloDataUrl = await cargarImagenComoDataURL("firma-sello.png");
-    dimFirmaSello = await obtenerDimensionesImagen(firmaSelloDataUrl);
-  }
+  const firmaExaminador = await obtenerFirmaExaminadorPdf();
 
   const val = (id) => document.getElementById(id).value || "-";
   const sexoVal = document.getElementById("sexo").value;
@@ -1228,7 +1310,7 @@ async function descargarReporte() {
     logoDataUrl: logoPersonal, dimLogo, etiquetaPersona: etiquetaEvaluado(sexoVal),
     nombre: val("nombre"), doc_id: val("id"), edad: val("edad"), sexoTexto,
     contactoNombre: val("contactoEmergenciaNombre"), contactoTel: val("contactoEmergenciaTel"),
-    fecha: val("fecha"), examinador: val("examinador"), firmaSelloDataUrl, dimFirmaSello,
+    fecha: val("fecha"), examinador: val("examinador"),
   });
 
   doc.setFont(undefined, "bold"); doc.setFontSize(16.5); doc.setTextColor(30, 34, 32);
@@ -1348,16 +1430,20 @@ async function descargarReporte() {
   y = escribirParrafo(doc, "Kline GM, Porcari JP, Hintermeister R, Freedson PS, Ward A, McCarron RF, Ross J, Rippe JM. Estimation of VO2max from a one-mile track walk, gender, age, and body weight. Med Sci Sports Exerc. 1987;19(3):253-9.", MX2, y, AU2, 3.2) + 6;
   doc.setTextColor(0, 0, 0);
 
-  // Firma y sello del examinador, al final del reporte (solo si se cargó).
-  if (firmaSelloDataUrl) {
+  // Firma (y sello, si aplica) del examinador, al final del reporte (solo si se cargó).
+  if (firmaExaminador.dataUrl) {
     const anchoFirma = 45;
-    const altoFirma = anchoFirma * ((dimFirmaSello ? dimFirmaSello.alto / dimFirmaSello.ancho : 308 / 745));
-    doc.addImage(firmaSelloDataUrl, "PNG", MX2, y, anchoFirma, altoFirma);
+    const altoFirma = anchoFirma * (firmaExaminador.ratio || (308 / 745));
+    doc.addImage(firmaExaminador.dataUrl, "PNG", MX2, y, anchoFirma, altoFirma);
     y += altoFirma + 3;
     doc.setDrawColor(180, 180, 180); doc.setLineWidth(0.2);
     doc.line(MX2, y, MX2 + anchoFirma, y);
     doc.setFontSize(7.8); doc.setTextColor(...PDF_GRIS);
-    doc.text("Firma y sello del examinador", MX2, y + 4.2);
+    doc.text(firmaExaminador.esPropio ? "Firma y sello del examinador" : "Firma del examinador", MX2, y + 4.2);
+    if (!firmaExaminador.esPropio && firmaExaminador.registroMedico) {
+      doc.setFontSize(7.2);
+      doc.text(`Registro médico: ${firmaExaminador.registroMedico}`, MX2, y + 8.4);
+    }
     doc.setTextColor(0, 0, 0);
   }
 
