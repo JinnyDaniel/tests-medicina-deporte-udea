@@ -393,9 +393,6 @@
       </div>
     </div>
 
-    <label style="margin-top:16px;">Nombre del evaluador/responsable</label>
-    <input type="text" id="nombreEvaluador">
-
     <div style="margin-top:18px;">
       <button type="button" onclick="descargarConsentimiento()">Descargar consentimiento informado (PDF)</button>
     </div>
@@ -540,15 +537,12 @@ const NOMBRE_EXAMINADOR_PROPIO = "Dr. Daniel Salcedo P.";
 function actualizarQuienRealiza() {
   const quien = document.getElementById("quienRealiza").value;
   const elExaminador = document.getElementById("examinador");
-  const elEvaluador = document.getElementById("nombreEvaluador");
   const bloqueOtro = document.getElementById("bloqueFirmaExaminadorOtro");
   if (quien === "yo") {
     elExaminador.value = NOMBRE_EXAMINADOR_PROPIO;
-    if (elEvaluador) elEvaluador.value = NOMBRE_EXAMINADOR_PROPIO;
     if (bloqueOtro) bloqueOtro.style.display = "none";
   } else {
     elExaminador.value = "";
-    if (elEvaluador) elEvaluador.value = "";
     if (bloqueOtro) bloqueOtro.style.display = "block";
     if (typeof ajustarCanvasExaminador === "function") ajustarCanvasExaminador();
   }
@@ -1195,7 +1189,7 @@ async function descargarConsentimiento() {
   const nombre = document.getElementById("nombre").value || "____________________";
   const idParticipante = document.getElementById("id").value || "____________________";
   const fecha = document.getElementById("fecha").value || new Date().toLocaleDateString();
-  const evaluador = document.getElementById("nombreEvaluador").value || "____________________";
+  const evaluador = document.getElementById("examinador").value || "____________________";
   const sexoVal = document.getElementById("sexo").value;
   const sexoTexto = sexoVal === "1" ? "Hombre" : (sexoVal === "0" ? "Mujer" : "-");
 
