@@ -532,8 +532,19 @@
   document.getElementById("hora").value = `${horas}:${minutos} ${ampm}`;
 })();
 
+// ---------- Nombre de archivo a partir del nombre del paciente ----------
+function sanitizarNombreArchivo(texto) {
+  const base = (texto || "")
+    .normalize("NFD").replace(/[̀-ͯ]/g, "") // quita acentos/diacríticos
+    .trim()
+    .replace(/[^a-zA-Z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  return base || "sin_nombre";
+}
+
 // ---------- ¿Quién realiza el test? (autocompleta examinador y habilita firma/sello) ----------
 const NOMBRE_EXAMINADOR_PROPIO = "Dr. Daniel Salcedo P.";
+const RM_EXAMINADOR_PROPIO = "1012383458";
 function actualizarQuienRealiza() {
   const quien = document.getElementById("quienRealiza").value;
   const elExaminador = document.getElementById("examinador");
@@ -993,7 +1004,7 @@ function etiquetaEvaluado(sexoVal) {
   return sexoVal === "1" ? "Evaluado" : (sexoVal === "0" ? "Evaluada" : "Evaluado/a");
 }
 
-function dibujarSidebarD(doc, { logoDataUrl, dimLogo, etiquetaPersona, nombre, doc_id, edad, sexoTexto, contactoNombre, contactoTel, fecha, examinador }) {
+function dibujarSidebarD(doc, { logoDataUrl, dimLogo, etiquetaPersona, nombre, doc_id, edad, sexoTexto, contactoNombre, contactoTel, fecha, examinador, registroMedico, esPropio }) {
   doc.setFillColor(...TEAL_CLARO_SIDEBAR);
   doc.rect(0, 0, SW, 297, "F");
   doc.setDrawColor(...BORDE_SIDEBAR); doc.setLineWidth(0.6);
@@ -1028,11 +1039,16 @@ function dibujarSidebarD(doc, { logoDataUrl, dimLogo, etiquetaPersona, nombre, d
   sy += 5;
   etiqueta("Examinador");
   lineas([examinador], 8.6, NEGRO_SIDEBAR);
+  if (registroMedico) {
+    lineas([`RM ${registroMedico}`], 7.8, [90, 95, 92]);
+  }
 
-  doc.setDrawColor(...BORDE_SIDEBAR); doc.setLineWidth(0.15);
-  doc.line(9, 262, SW - 9, 262);
-  doc.setFont(undefined, "normal"); doc.setFontSize(6.4); doc.setTextColor(120, 130, 124);
-  doc.text("Medicina del Deporte y la\nActividad Física\nUniversidad de Antioquia\nRM 1012383458", 9, 268);
+  if (esPropio) {
+    doc.setDrawColor(...BORDE_SIDEBAR); doc.setLineWidth(0.15);
+    doc.line(9, 262, SW - 9, 262);
+    doc.setFont(undefined, "normal"); doc.setFontSize(6.4); doc.setTextColor(120, 130, 124);
+    doc.text("Medicina del Deporte y la\nActividad Física\nUniversidad de Antioquia", 9, 268);
+  }
   doc.setTextColor(0, 0, 0);
 }
 
@@ -1151,9 +1167,9 @@ async function obtenerFirmaExaminadorPdf() {
   if (esPropio) {
     const dataUrl = await cargarImagenComoDataURL("firma-sello.png");
     const dim = await obtenerDimensionesImagen(dataUrl);
-    return { dataUrl, ratio: dim.alto / dim.ancho, registroMedico: null, esPropio: true };
+    return { dataUrl, ratio: dim.alto / dim.ancho, registroMedico: RM_EXAMINADOR_PROPIO, esPropio: true };
   }
-  const registroMedico = (document.getElementById("registroMedicoExaminador").value || "").trim();
+  const registroMedico = (document.getElementById("registroMedicoExaminador").value || "").trim().replace(/^RM\.?\s*/i, "");
   if (firmaExaminadorEstaVacia()) {
     return { dataUrl: null, ratio: null, registroMedico, esPropio: false };
   }
@@ -1199,6 +1215,7 @@ async function descargarConsentimiento() {
     contactoNombre: document.getElementById("contactoEmergenciaNombre").value,
     contactoTel: document.getElementById("contactoEmergenciaTel").value,
     fecha, examinador: evaluador,
+    registroMedico: firmaExaminador.registroMedico, esPropio: firmaExaminador.esPropio,
   });
 
   doc.setFont(undefined, "bold"); doc.setFontSize(16.5); doc.setTextColor(30, 34, 32);
@@ -1282,7 +1299,7 @@ async function descargarConsentimiento() {
   }
   doc.setTextColor(0, 0, 0);
 
-  doc.save("consentimiento_informado_test_milla.pdf");
+  doc.save(`consentimiento_informado_${sanitizarNombreArchivo(nombre)}.pdf`);
 }
 
 // ---------- PDF: Reporte del test (diseño con barra lateral) ----------
@@ -1305,6 +1322,7 @@ async function descargarReporte() {
     nombre: val("nombre"), doc_id: val("id"), edad: val("edad"), sexoTexto,
     contactoNombre: val("contactoEmergenciaNombre"), contactoTel: val("contactoEmergenciaTel"),
     fecha: val("fecha"), examinador: val("examinador"),
+    registroMedico: firmaExaminador.registroMedico, esPropio: firmaExaminador.esPropio,
   });
 
   doc.setFont(undefined, "bold"); doc.setFontSize(16.5); doc.setTextColor(30, 34, 32);
@@ -1441,7 +1459,7 @@ async function descargarReporte() {
     doc.setTextColor(0, 0, 0);
   }
 
-  doc.save("reporte_test_milla.pdf");
+  doc.save(`reporte_test_milla_${sanitizarNombreArchivo(val("nombre"))}.pdf`);
 }
 </script>
 </body>
