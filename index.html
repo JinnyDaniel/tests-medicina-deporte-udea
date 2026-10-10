@@ -8,8 +8,8 @@
 <link rel="icon" type="image/png" sizes="180x180" href="favicon.png">
 <style>
   :root{
-    --verde:#0f5c33;
-    --verde-oscuro:#0a3d22;
+    --teal:#0e6e76;
+    --azul-oscuro:#002d4f;
     --gris-fondo:#f5f6f5;
     --gris-borde:#dcdfdc;
     --texto:#1c1f1e;
@@ -23,42 +23,42 @@
   }
   header{
     background:#fff;
-    border-bottom:4px solid var(--verde);
+    border-bottom:4px solid var(--teal);
     padding:20px 24px;
     display:flex; align-items:center; gap:20px; flex-wrap:wrap;
   }
   header img.logo-personal{ height:84px; }
   header .titulos{ flex:1; min-width:220px; }
-  header .titulos h1{ margin:0; font-size:1.05rem; color:var(--verde-oscuro); }
+  header .titulos h1{ margin:0; font-size:1.05rem; color:var(--azul-oscuro); }
   header .titulos p{ margin:2px 0 0; font-size:0.85rem; color:#555; }
   .header-contacto{ display:flex; gap:16px; flex-wrap:wrap; margin-top:8px; }
-  .header-contacto a{ display:inline-flex; align-items:center; gap:4px; font-size:0.74rem; color:var(--verde-oscuro); text-decoration:none; font-weight:500; }
+  .header-contacto a{ display:inline-flex; align-items:center; gap:4px; font-size:0.74rem; color:var(--azul-oscuro); text-decoration:none; font-weight:500; }
   .header-contacto a:hover{ text-decoration:underline; }
-  .header-contacto svg{ width:13px; height:13px; fill:var(--verde); flex-shrink:0; }
+  .header-contacto svg{ width:13px; height:13px; fill:var(--teal); flex-shrink:0; }
   main{ max-width:920px; margin:0 auto; padding:32px 20px 60px; }
-  h2{ color:var(--verde-oscuro); }
+  h2{ color:var(--azul-oscuro); }
   .intro{ background:#fff; border:1px solid var(--gris-borde); border-radius:10px; padding:20px 24px; margin-bottom:28px; }
   .cards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px; }
   .card{
     background:#fff; border:1px solid var(--gris-borde); border-radius:10px;
     padding:20px; display:flex; flex-direction:column; gap:10px;
   }
-  .card h3{ margin:0; color:var(--verde-oscuro); font-size:1.05rem; }
+  .card h3{ margin:0; color:var(--azul-oscuro); font-size:1.05rem; }
   .card p{ margin:0; font-size:0.9rem; color:#444; flex:1; }
   .badge{ display:inline-block; font-size:0.72rem; font-weight:600; padding:3px 10px; border-radius:20px; width:fit-content; }
-  .badge.disponible{ background:#e2f3e8; color:var(--verde-oscuro); }
+  .badge.disponible{ background:#dff4f3; color:var(--azul-oscuro); }
   .badge.pendiente{ background:#f0efe8; color:#8a7c3f; }
   .card a.btn{
     display:inline-block; text-align:center; text-decoration:none;
-    background:var(--verde); color:#fff; padding:9px 14px; border-radius:6px; font-size:0.9rem;
+    background:var(--teal); color:#fff; padding:9px 14px; border-radius:6px; font-size:0.9rem;
   }
   .card.disabled{ opacity:0.65; }
   .card.disabled .btn{ background:#b7bab6; pointer-events:none; }
   footer{ text-align:center; font-size:0.78rem; color:#777; padding:26px 20px 20px; border-top:1px solid var(--gris-borde); margin-top:12px; }
   .footer-contacto{ display:flex; justify-content:center; align-items:center; gap:22px; flex-wrap:wrap; margin-bottom:12px; }
-  .footer-contacto a{ display:inline-flex; align-items:center; gap:6px; color:var(--verde-oscuro); text-decoration:none; font-size:0.85rem; font-weight:600; }
+  .footer-contacto a{ display:inline-flex; align-items:center; gap:6px; color:var(--azul-oscuro); text-decoration:none; font-size:0.85rem; font-weight:600; }
   .footer-contacto a:hover{ text-decoration:underline; }
-  .footer-contacto svg{ width:16px; height:16px; fill:var(--verde); flex-shrink:0; }
+  .footer-contacto svg{ width:16px; height:16px; fill:var(--teal); flex-shrink:0; }
   .footer-linea{ margin:4px 0; }
   .footer-licencia{ margin:6px 0 0; font-size:0.72rem; color:#999; }
   .footer-licencia a{ color:#999; }
@@ -68,7 +68,7 @@
 <body>
 
 <header>
-  <img class="logo-personal" src="mi-logo.png" alt="Daniel Salcedo — Medicina del Deporte y la Actividad Física" onerror="this.style.display='none'">
+  <img class="logo-personal" src="logo-header.png" alt="Daniel Salcedo — Medicina del Deporte y la Actividad Física" onerror="this.style.display='none'">
   <div class="titulos">
     <h1>Medicina del Deporte y la Actividad Física</h1>
     <p>Universidad de Antioquia</p>

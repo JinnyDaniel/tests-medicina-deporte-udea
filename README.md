@@ -11,8 +11,9 @@ Incluye por ahora el **test de caminata de 1 milla (Rockport Walk Test)**, sigui
 - `index.html` — catálogo/portada con la lista de tests.
 - `milla.html` — el formulario del test de la milla (incluye la lista de chequeo, la valoración, el PAR-Q, el consentimiento y la hoja de registro).
 - `jspdf.umd.min.js` — librería para generar los PDF (no requiere internet).
-- `mi-logo.png` — tu logo personal (el único logo usado en toda la página y en los PDF).
-- `favicon.ico` y `favicon.png` — ícono de la pestaña del navegador.
+- `logo-header.png` — tu logo a color, usado en la cabecera de la página (catálogo y formulario).
+- `logo-pdf.png` — tu logo en versión monocromática, usado en la barra lateral de los PDF (reporte y consentimiento).
+- `favicon.ico` y `favicon.png` — ícono de la pestaña del navegador (la insignia circular de tu logo).
 - `formula-vo2-lmin.png` y `formula-vo2-relativo.png` — las dos ecuaciones de Kline y cols. (1987), tipografiadas en notación matemática (TeX), tal como aparecen en la página junto al formulario.
 - `firma-sello.png` — tu firma y sello, usados automáticamente en el reporte y el consentimiento cuando eliges "Yo" en "¿Quién realiza el test?".
 
@@ -24,7 +25,7 @@ No cambies los nombres de estos archivos: el código los busca exactamente con e
 2. Arriba a la derecha, haz clic en el **+** y elige **New repository**.
 3. Ponle un nombre (por ejemplo `tests-medicina-deporte`), déjalo en **Public**, y haz clic en **Create repository**. No marques ninguna otra opción.
 4. En la página del repositorio recién creado, haz clic en **Add file → Upload files**.
-5. Arrastra los 9 archivos de esta carpeta (`index.html`, `milla.html`, `jspdf.umd.min.js`, `mi-logo.png`, `favicon.ico`, `favicon.png`, `formula-vo2-lmin.png`, `formula-vo2-relativo.png`, `firma-sello.png`) a la ventana del navegador, o haz clic en "choose your files" y selecciónalos todos a la vez.
+5. Arrastra los 10 archivos de esta carpeta (`index.html`, `milla.html`, `jspdf.umd.min.js`, `logo-header.png`, `logo-pdf.png`, `favicon.ico`, `favicon.png`, `formula-vo2-lmin.png`, `formula-vo2-relativo.png`, `firma-sello.png`) a la ventana del navegador, o haz clic en "choose your files" y selecciónalos todos a la vez.
 6. Baja hasta el final de la página y haz clic en **Commit changes**.
 7. Ve a la pestaña **Settings** del repositorio (arriba).
 8. En el menú de la izquierda, haz clic en **Pages**.
