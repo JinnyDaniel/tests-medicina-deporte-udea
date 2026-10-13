@@ -16,6 +16,8 @@
     --texto:#1c1f1e;
     --amarillo:#fbf4d8;
     --amarillo-borde:#e4d78e;
+    --rojo:#fbe2e0;
+    --rojo-borde:#e3a09b;
   }
   *{box-sizing:border-box;}
   body{
@@ -61,6 +63,8 @@
   .parq-opciones{ display:flex; gap:14px; white-space:nowrap; padding-top:2px; }
   .parq-opciones label{ margin:0; font-weight:400; display:flex; align-items:center; gap:4px; font-size:0.85rem; }
   #avisoParq{ display:none; background:var(--amarillo); border:1px solid var(--amarillo-borde); border-radius:8px; padding:12px 14px; font-size:0.86rem; margin-top:14px; }
+  #avisoFcReposo{ display:none; background:var(--amarillo); border:1px solid var(--amarillo-borde); border-radius:8px; padding:10px 14px; font-size:0.84rem; margin-top:10px; }
+  #avisoTaReposo{ display:none; background:var(--rojo); border:1px solid var(--rojo-borde); border-radius:8px; padding:10px 14px; font-size:0.84rem; margin-top:10px; }
   .texto-consentimiento{ font-size:0.9rem; line-height:1.5; }
   .texto-consentimiento li{ margin-bottom:8px; }
   .firma-wrap{ margin-top:16px; }
@@ -264,7 +268,7 @@
           <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Superficie plana y medida de 1 milla (1609 m): pista atlética de 400 m (4 vueltas + 9 m) o ruta medida con GPS/rueda de medición.</span></label></li>
           <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Cronómetro.</span></label></li>
           <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Pulsómetro, o método confiable para palpación manual del pulso.</span></label></li>
-          <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Báscula y tallímetro (si no se cuenta con datos previos).</span></label></li>
+          <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Báscula (si no se cuenta con el peso actualizado del participante).</span></label></li>
           <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Tensiómetro.</span></label></li>
           <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Este formulario a mano (computador, tablet o celular) para diligenciar y descargar los PDF.</span></label></li>
           <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Plan de respuesta ante evento adverso y datos de contacto de emergencia.</span></label></li>
@@ -344,13 +348,15 @@
     <div class="fila">
       <div><label>Peso (kg)</label><input type="number" step="0.1" id="peso" min="20" max="250" oninput="actualizarPesoLb()"></div>
       <div><label>Peso (lb) — calculado automáticamente</label><input type="text" id="pesoLb" disabled></div>
-      <div><label>Talla (cm)</label><input type="number" id="talla" min="100" max="230"></div>
     </div>
     <div class="fila">
-      <div><label>FC de reposo (lpm)</label><input type="number" id="fcReposo" min="30" max="150"></div>
-      <div><label>TA de reposo (mmHg)</label><input type="text" id="taReposo"></div>
+      <div><label>FC de reposo (lpm)</label><input type="number" id="fcReposo" min="30" max="220" oninput="actualizarAlertaFcReposo()"></div>
+      <div><label>TAS de reposo (mmHg)</label><input type="number" id="tasReposo" min="60" max="260" oninput="actualizarAlertaTaReposo()"></div>
+      <div><label>TAD de reposo (mmHg)</label><input type="number" id="tadReposo" min="30" max="160" oninput="actualizarAlertaTaReposo()"></div>
       <div><label>FC máxima calculada¹ (208 − 0,7 × edad) <button type="button" class="info-btn" data-tip="fcmax" aria-label="Definición">?</button></label><input type="text" id="fcMax" disabled></div>
     </div>
+    <div id="avisoFcReposo">ℹ FC de reposo fuera del rango habitual (&lt;40 o &gt;100 lpm). No es, por sí sola, una contraindicación: revise si es un hallazgo fisiológico (p. ej. bradicardia del deportista entrenado) o si se acompaña de síntomas o irregularidad del pulso antes de continuar.</div>
+    <div id="avisoTaReposo">⚠ TA de reposo en rango de hipertensión severa (TAS &gt;200 y/o TAD &gt;110 mmHg). Es una contraindicación relativa para realizar la prueba de esfuerzo (ACSM): evalúe antes de continuar.</div>
   </section>
 
   <!-- ===================== 2. PAR-Q ===================== -->
@@ -439,11 +445,7 @@
       </div>
     </div>
 
-    <div class="fila" style="margin-top:18px;">
-      <div><label>FC de recuperación (lpm)</label><input type="number" id="fcRecuperacion" min="30" max="220"></div>
-      <div><label>TA de recuperación (mmHg)</label><input type="text" id="taRecuperacion"></div>
-    </div>
-    <label>Síntomas</label>
+    <label style="margin-top:18px;">Síntomas</label>
     <input type="text" id="sintomas">
 
     <label>Observaciones</label>
@@ -490,7 +492,7 @@
   <ol class="protocolo-lista">
     <li>Diligenciar la valoración pre-test y el PAR-Q, confirmando además en el interrogatorio de medicamentos la ausencia de fármacos con efecto cronotrópico relevante (β-bloqueadores, estimulantes). Ante cualquier respuesta positiva o signo de alarma, evaluar contraindicación antes de continuar.</li>
     <li>Explicar la prueba y firmar el consentimiento informado.</li>
-    <li>Tomar medidas basales: peso, talla, FC y TA en reposo.</li>
+    <li>Tomar medidas basales: peso, FC y TA en reposo. Si la TA es &gt;200/110 mmHg o la FC está fuera de 40-100 lpm, evaluar antes de continuar (ver avisos del formulario).</li>
     <li>Ajustar y verificar la telemetría de FC (monitor de pecho o palpación continua confiable) antes de iniciar el esfuerzo.</li>
     <li>Realizar un calentamiento estandarizado: movilidad articular y caminata suave de 3 a 5 minutos.</li>
     <li>Explicar la consigna verbal estandarizada:
@@ -745,6 +747,23 @@ document.getElementById("edad").addEventListener("input", () => {
   document.getElementById("fcMax").value = isFinite(edad) ? (208 - 0.7 * edad).toFixed(0) : "";
 });
 
+// ---------- Alertas de FC y TA de reposo ----------
+// FC: aviso informativo (no bloqueante) fuera de 40-100 lpm; una FC de reposo anormal aislada
+// no es por sí sola contraindicación (p. ej. bradicardia fisiológica del deportista entrenado).
+function actualizarAlertaFcReposo() {
+  const fc = parseFloat(document.getElementById("fcReposo").value);
+  const aviso = document.getElementById("avisoFcReposo");
+  aviso.style.display = isFinite(fc) && (fc < 40 || fc > 100) ? "block" : "none";
+}
+// TA: TAS >200 y/o TAD >110 mmHg = hipertensión severa en reposo, contraindicación relativa
+// para la prueba de esfuerzo según ACSM (Guidelines for Exercise Testing and Prescription).
+function actualizarAlertaTaReposo() {
+  const tas = parseFloat(document.getElementById("tasReposo").value);
+  const tad = parseFloat(document.getElementById("tadReposo").value);
+  const aviso = document.getElementById("avisoTaReposo");
+  aviso.style.display = (isFinite(tas) && tas > 200) || (isFinite(tad) && tad > 110) ? "block" : "none";
+}
+
 // ---------- Firma digital (canvas) ----------
 const canvas = document.getElementById("firmaCanvas");
 const ctx = canvas.getContext("2d");
@@ -855,10 +874,10 @@ function firmaExaminadorEstaVacia() {
 const RANGOS_RAZONABLES = {
   edad: { min: 5, max: 100, etiqueta: "La edad" },
   peso: { min: 20, max: 250, etiqueta: "El peso" },
-  talla: { min: 100, max: 230, etiqueta: "La talla" },
-  fcReposo: { min: 30, max: 150, etiqueta: "La FC de reposo" },
+  fcReposo: { min: 30, max: 220, etiqueta: "La FC de reposo" },
+  tasReposo: { min: 60, max: 260, etiqueta: "La TAS de reposo" },
+  tadReposo: { min: 30, max: 160, etiqueta: "La TAD de reposo" },
   hr14: { min: 60, max: 220, etiqueta: "La FC del último cuarto de milla (HR1-4)" },
-  fcRecuperacion: { min: 30, max: 220, etiqueta: "La FC de recuperación" },
 };
 
 function validarRangoNumerico(id) {
@@ -893,21 +912,12 @@ function validarTiempoT1() {
   return true;
 }
 
-function validarPresionArterial(id, etiqueta) {
-  const el = document.getElementById(id);
-  const valor = el.value.trim();
-  if (valor === "") return true;
-  const m = valor.match(/^(\d{2,3})\s*\/\s*(\d{2,3})$/);
-  if (!m) {
-    alert(`${etiqueta} debe tener el formato "sistólica/diastólica" (por ejemplo, 120/80).`);
-    el.focus();
-    return false;
-  }
-  const sistolica = parseInt(m[1], 10);
-  const diastolica = parseInt(m[2], 10);
-  if (sistolica < 60 || sistolica > 260 || diastolica < 30 || diastolica > 150 || diastolica >= sistolica) {
-    alert(`${etiqueta} tiene un valor fuera de un rango fisiológicamente razonable (sistólica 60-260 mmHg, diastólica 30-150 mmHg, sistólica mayor que diastólica). Revise "${valor}".`);
-    el.focus();
+function validarRelacionTaReposo() {
+  const tas = parseFloat(document.getElementById("tasReposo").value);
+  const tad = parseFloat(document.getElementById("tadReposo").value);
+  if (isFinite(tas) && isFinite(tad) && tad >= tas) {
+    alert(`La TA de reposo no es fisiológicamente coherente: la diastólica (${tad}) debe ser menor que la sistólica (${tas}).`);
+    document.getElementById("tadReposo").focus();
     return false;
   }
   return true;
@@ -933,8 +943,7 @@ function validarDatosRazonables() {
     if (!validarRangoNumerico(id)) return false;
   }
   if (!validarTiempoT1()) return false;
-  if (!validarPresionArterial("taReposo", "La TA de reposo")) return false;
-  if (!validarPresionArterial("taRecuperacion", "La TA de recuperación")) return false;
+  if (!validarRelacionTaReposo()) return false;
   if (!validarTelefono("contactoEmergenciaTel", "El teléfono del contacto de emergencia")) return false;
   return true;
 }
@@ -1354,9 +1363,8 @@ async function descargarReporte() {
   y = tituloD(doc, "Examen físico", y);
   y = camposListaD(doc, [
     ["Peso", `${val("peso")} kg (${val("pesoLb")} lb)`],
-    ["Talla", `${val("talla")} cm`],
     ["FC de reposo", `${val("fcReposo")} lpm`],
-    ["TA de reposo", `${val("taReposo")} mmHg`],
+    ["TA de reposo", `${val("tasReposo")}/${val("tadReposo")} mmHg`],
     ["FC máxima calculada", `${val("fcMax")} lpm`],
   ], y);
 
@@ -1439,8 +1447,6 @@ async function descargarReporte() {
 
   y = tituloD(doc, "Evaluación posterior", y);
   y = camposListaD(doc, [
-    ["FC de recuperación", `${val("fcRecuperacion")} lpm`],
-    ["TA de recuperación", `${val("taRecuperacion")} mmHg`],
     ["Síntomas", val("sintomas")],
   ], y);
 
