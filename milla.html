@@ -58,6 +58,14 @@
   }
   textarea{ font-family:inherit; resize:vertical; }
   .fila{ display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; }
+  .campo-con-ninguno{ display:flex; align-items:center; gap:10px; }
+  .campo-con-ninguno input[type=text]{ flex:1; min-width:0; }
+  .campo-con-ninguno input[type=text]:disabled{ background:#f1f1f1; color:#888; }
+  .ninguno-check{
+    display:flex; align-items:center; gap:5px; margin:0; font-weight:400;
+    font-size:0.8rem; color:#555; white-space:nowrap; cursor:pointer;
+  }
+  .ninguno-check input[type=checkbox]{ width:15px; height:15px; accent-color:var(--teal); cursor:pointer; }
   .parq-item{ border-bottom:1px solid #eee; padding:12px 0; display:flex; justify-content:space-between; gap:14px; align-items:flex-start; }
   .parq-item p{ margin:0; font-size:0.88rem; flex:1; }
   .parq-opciones{ display:flex; gap:14px; white-space:nowrap; padding-top:2px; }
@@ -347,15 +355,42 @@
     </div>
 
     <div class="fila">
-      <div><label>Enfermedades</label><input type="text" id="enfermedades"></div>
-      <div><label>Medicamentos</label><input type="text" id="medicamentos"></div>
+      <div>
+        <label>Enfermedades</label>
+        <div class="campo-con-ninguno">
+          <input type="text" id="enfermedades" oninput="desmarcarNinguno('enfermedades')">
+          <label class="ninguno-check"><input type="checkbox" id="enfermedadesNinguno" onchange="toggleNinguno('enfermedades')">Ninguna</label>
+        </div>
+      </div>
+      <div>
+        <label>Medicamentos</label>
+        <div class="campo-con-ninguno">
+          <input type="text" id="medicamentos" oninput="desmarcarNinguno('medicamentos')">
+          <label class="ninguno-check"><input type="checkbox" id="medicamentosNinguno" onchange="toggleNinguno('medicamentos')">Ninguno</label>
+        </div>
+      </div>
     </div>
     <div class="fila">
-      <div><label>Cirugías</label><input type="text" id="cirugias"></div>
-      <div><label>Lesiones osteomusculares</label><input type="text" id="lesiones"></div>
+      <div>
+        <label>Cirugías</label>
+        <div class="campo-con-ninguno">
+          <input type="text" id="cirugias" oninput="desmarcarNinguno('cirugias')">
+          <label class="ninguno-check"><input type="checkbox" id="cirugiasNinguno" onchange="toggleNinguno('cirugias')">Ninguna</label>
+        </div>
+      </div>
+      <div>
+        <label>Lesiones osteomusculares</label>
+        <div class="campo-con-ninguno">
+          <input type="text" id="lesiones" oninput="desmarcarNinguno('lesiones')">
+          <label class="ninguno-check"><input type="checkbox" id="lesionesNinguno" onchange="toggleNinguno('lesiones')">Ninguna</label>
+        </div>
+      </div>
     </div>
     <label>Alergias</label>
-    <input type="text" id="alergias">
+    <div class="campo-con-ninguno">
+      <input type="text" id="alergias" oninput="desmarcarNinguno('alergias')">
+      <label class="ninguno-check"><input type="checkbox" id="alergiasNinguno" onchange="toggleNinguno('alergias')">Ninguna conocida</label>
+    </div>
 
     <div class="fila">
       <div><label>Peso (kg)</label><input type="number" step="0.1" id="peso" min="20" max="250" oninput="actualizarPesoLb()"></div>
@@ -458,7 +493,10 @@
     </div>
 
     <label style="margin-top:18px;">Síntomas</label>
-    <input type="text" id="sintomas">
+    <div class="campo-con-ninguno">
+      <input type="text" id="sintomas" oninput="desmarcarNinguno('sintomas')">
+      <label class="ninguno-check"><input type="checkbox" id="sintomasNinguno" onchange="toggleNinguno('sintomas')">Ninguno</label>
+    </div>
 
     <label>Observaciones</label>
     <textarea id="observaciones" rows="3"></textarea>
@@ -822,6 +860,22 @@ document.getElementById("edad").addEventListener("input", () => {
   const edad = parseFloat(document.getElementById("edad").value);
   document.getElementById("fcMax").value = isFinite(edad) ? (208 - 0.7 * edad).toFixed(0) : "";
 });
+
+// ---------- Casillas "Ninguno/a" (enfermedades, medicamentos, cirugías, lesiones, alergias, síntomas) ----------
+function toggleNinguno(campoId) {
+  const checkbox = document.getElementById(campoId + "Ninguno");
+  const input = document.getElementById(campoId);
+  if (checkbox.checked) {
+    input.value = "";
+    input.disabled = true;
+  } else {
+    input.disabled = false;
+  }
+}
+function desmarcarNinguno(campoId) {
+  const checkbox = document.getElementById(campoId + "Ninguno");
+  if (checkbox.checked) checkbox.checked = false;
+}
 
 // ---------- Alertas de FC y TA de reposo ----------
 // FC: aviso informativo (no bloqueante) fuera de 40-100 lpm; una FC de reposo anormal aislada
@@ -1410,6 +1464,10 @@ async function descargarReporte() {
   const firmaExaminador = await obtenerFirmaExaminadorPdf();
 
   const val = (id) => document.getElementById(id).value || "-";
+  const valOrNinguno = (id, textoNinguno) => {
+    const checkboxNinguno = document.getElementById(id + "Ninguno");
+    return (checkboxNinguno && checkboxNinguno.checked) ? textoNinguno : val(id);
+  };
   const sexoVal = document.getElementById("sexo").value;
   const sexoTexto = sexoVal === "1" ? "Hombre" : (sexoVal === "0" ? "Mujer" : "-");
 
@@ -1429,11 +1487,11 @@ async function descargarReporte() {
 
   y = tituloD(doc, "Antecedentes", y);
   y = camposListaD(doc, [
-    ["Enfermedades", val("enfermedades")],
-    ["Medicamentos", val("medicamentos")],
-    ["Cirugías", val("cirugias")],
-    ["Lesiones osteomusculares", val("lesiones")],
-    ["Alergias", val("alergias")],
+    ["Enfermedades", valOrNinguno("enfermedades", "Ninguna")],
+    ["Medicamentos", valOrNinguno("medicamentos", "Ninguno")],
+    ["Cirugías", valOrNinguno("cirugias", "Ninguna")],
+    ["Lesiones osteomusculares", valOrNinguno("lesiones", "Ninguna")],
+    ["Alergias", valOrNinguno("alergias", "Ninguna conocida")],
   ], y);
 
   y = tituloD(doc, "Examen físico", y);
@@ -1523,7 +1581,7 @@ async function descargarReporte() {
 
   y = tituloD(doc, "Evaluación posterior", y);
   y = camposListaD(doc, [
-    ["Síntomas", val("sintomas")],
+    ["Síntomas", valOrNinguno("sintomas", "Ninguno")],
   ], y);
 
   doc.setFont(undefined, "bold"); doc.setFontSize(8.4); doc.setTextColor(0, 0, 0);
