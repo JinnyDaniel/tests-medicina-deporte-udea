@@ -4,7 +4,9 @@ Página web con las proformas de tests de campo (valoración pre-test, PAR-Q, co
 
 **Todo funciona dentro del navegador de quien la usa.** No hay servidor, no hay base de datos, no se envía ningún dato a ningún lado — por eso no hace falta configurar nada además de subir los archivos.
 
-Incluye por ahora el **test de caminata de 1 milla (Rockport Walk Test)**, siguiendo el artículo de Kline y cols. (1987), con su lista de chequeo de material/preparación integrada en la propia página. Un "test de laboratorio" queda como "próximamente" en el catálogo, como espacio reservado para el siguiente test que se agregue.
+Incluye por ahora el **test de caminata de 1 milla (Rockport Walk Test)**, siguiendo el artículo de Kline y cols. (1987) para el cálculo del VO₂máx y la fórmula de Tanaka, Monahan & Seals (2001) para la FC máxima estimada (208 − 0,7 × edad). Un "test de laboratorio" queda como "próximamente" en el catálogo, como espacio reservado para el siguiente test que se agregue.
+
+El formulario permite indicar quién realiza el test (tú o un examinador externo): si es otra persona, se habilita un espacio para que dibuje su firma y registre su número de registro médico (RM), que se incluyen junto con el participante en ambos PDF. El pie institucional de la Universidad de Antioquia solo aparece en los documentos cuando tú eres el examinador. Los PDF descargables se nombran automáticamente con el nombre del paciente, para que sean fáciles de identificar en tus archivos.
 
 ## Archivos de esta carpeta
 
@@ -15,7 +17,7 @@ Incluye por ahora el **test de caminata de 1 milla (Rockport Walk Test)**, sigui
 - `logo-pdf.png` — tu logo en versión monocromática, usado en la barra lateral de los PDF (reporte y consentimiento).
 - `favicon.ico` y `favicon.png` — ícono de la pestaña del navegador (la insignia circular de tu logo).
 - `formula-vo2-lmin.png` y `formula-vo2-relativo.png` — las dos ecuaciones de Kline y cols. (1987), tipografiadas en notación matemática (TeX), tal como aparecen en la página junto al formulario.
-- `firma-sello.png` — tu firma y sello, usados automáticamente en el reporte y el consentimiento cuando eliges "Yo" en "¿Quién realiza el test?".
+- `firma-sello.png` — tu firma y sello, usados automáticamente en el reporte y el consentimiento cuando eliges "Daniel" en "¿Quién realiza el test?".
 
 No cambies los nombres de estos archivos: el código los busca exactamente con esos nombres.
 
@@ -47,4 +49,4 @@ Cada vez que quieras cambiar algo (agregar un test nuevo, corregir un texto), ed
 
 ## Nota sobre los PDF descargables
 
-Los botones "Descargar consentimiento informado (PDF)" y "Descargar reporte del test (PDF)" generan el archivo directamente en el navegador de quien esté usando la página — nadie más ve esos datos, ni siquiera tú, a menos que la persona te comparta el PDF descargado. Esto solo funciona correctamente una vez la página esté publicada en GitHub Pages (no al abrir el archivo `milla.html` haciendo doble clic en tu computador).
+Los botones "Descargar consentimiento informado (PDF)" y "Descargar reporte del test (PDF)" generan el archivo directamente en el navegador de quien esté usando la página — nadie más ve esos datos, ni siquiera tú, a menos que la persona te comparta el PDF descargado. El nombre del archivo descargado incluye automáticamente el nombre del paciente (por ejemplo `reporte_test_milla_Juan_Perez.pdf`), sin tildes ni caracteres especiales, para facilitar su identificación y archivo. Esto solo funciona correctamente una vez la página esté publicada en GitHub Pages (no al abrir el archivo `milla.html` haciendo doble clic en tu computador).
