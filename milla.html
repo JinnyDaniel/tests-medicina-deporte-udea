@@ -150,6 +150,11 @@
   .protocolo-lista{ margin:12px 0 0; padding-left:20px; font-size:0.85rem; line-height:1.5; }
   .protocolo-lista li{ margin-bottom:9px; }
   .protocolo-nota{ font-size:0.74rem; color:#666; border-top:1px solid #eee; margin-top:12px; padding-top:10px; line-height:1.5; }
+  .consigna-box{
+    background:#e9f6f6; border:1px solid #bfe0de; border-left:3px solid var(--teal);
+    border-radius:6px; padding:8px 12px; margin-top:6px; font-style:italic; color:var(--azul-oscuro);
+    font-size:0.84rem; line-height:1.5;
+  }
 
   .cronometro-fab{
     position:fixed; bottom:80px; right:22px; z-index:1000;
@@ -263,13 +268,15 @@
           <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Tensiómetro.</span></label></li>
           <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Este formulario a mano (computador, tablet o celular) para diligenciar y descargar los PDF.</span></label></li>
           <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Plan de respuesta ante evento adverso y datos de contacto de emergencia.</span></label></li>
+          <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Confirmar en el interrogatorio de medicamentos la ausencia de fármacos con efecto cronotrópico relevante (p. ej. β-bloqueadores, estimulantes): alteran la FC de esfuerzo y sesgan la estimación del VO₂máx basada en HR1-4.</span></label></li>
         </ul>
       </div>
       <div>
         <p class="checklist-titulo">Para el paciente/participante</p>
         <ul class="checklist">
           <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Ropa y calzado cómodos para caminar a paso rápido.</span></label></li>
-          <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Evitar comida copiosa, exceso de cafeína o ejercicio intenso en las horas previas a la prueba.</span></label></li>
+          <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Ayuno leve de 2 a 3 horas antes de la prueba; evitar cafeína y tabaco el día del test.</span></label></li>
+          <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>No realizar ejercicio físico extenuante en las 24 horas previas a la prueba.</span></label></li>
           <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Hidratación adecuada antes de iniciar.</span></label></li>
           <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>Informar antecedentes médicos relevantes antes de comenzar.</span></label></li>
           <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>No presentar signos de alarma el día de la prueba (fiebre, dolor torácico, mareo, lesión aguda, etc. — ver PAR-Q).</span></label></li>
@@ -481,10 +488,14 @@
   <h3>Protocolo paso a paso</h3>
   <p class="subt">Test de caminata de 1 milla (Rockport Walk Test)</p>
   <ol class="protocolo-lista">
-    <li>Diligenciar la valoración pre-test y el PAR-Q. Ante cualquier respuesta positiva o signo de alarma, evaluar contraindicación antes de continuar.</li>
+    <li>Diligenciar la valoración pre-test y el PAR-Q, confirmando además en el interrogatorio de medicamentos la ausencia de fármacos con efecto cronotrópico relevante (β-bloqueadores, estimulantes). Ante cualquier respuesta positiva o signo de alarma, evaluar contraindicación antes de continuar.</li>
     <li>Explicar la prueba y firmar el consentimiento informado.</li>
     <li>Tomar medidas basales: peso, talla, FC y TA en reposo.</li>
-    <li>Explicar la consigna: caminar la milla lo más rápido posible, sin trotar ni correr, manteniendo el esfuerzo sostenido durante todo el recorrido.</li>
+    <li>Ajustar y verificar la telemetría de FC (monitor de pecho o palpación continua confiable) antes de iniciar el esfuerzo.</li>
+    <li>Realizar un calentamiento estandarizado: movilidad articular y caminata suave de 3 a 5 minutos.</li>
+    <li>Explicar la consigna verbal estandarizada:
+      <div class="consigna-box">&ldquo;Camine la milla completa lo más rápido posible, manteniendo un ritmo constante y sostenido, sin trotar ni correr en ningún momento.&rdquo;</div>
+    </li>
     <li>Iniciar el cronómetro en el momento en que el participante comienza a caminar.</li>
     <li>Al completar la milla, detener el cronómetro (T1) y registrar de inmediato la frecuencia cardíaca del último cuarto de milla (HR1-4).</li>
     <li>Realizar la evaluación posterior: FC y TA de recuperación, e indagar síntomas.</li>
@@ -1256,7 +1267,7 @@ async function descargarConsentimiento() {
   doc.setFontSize(9);
   const parrafoDatos1 = "Autorizo el uso de los datos personales y clínicos solicitados en este formulario exclusivamente para los fines de esta prueba: la valoración pre-test, el cálculo del VO2max y la generación de los documentos de consentimiento y reporte en formato PDF. El tratamiento de estos datos se rige por la Ley 1581 de 2012 y el Decreto 1377 de 2013, marco general de protección de datos personales en Colombia.";
   y = escribirParrafo(doc, parrafoDatos1, MX2, y, AU2, 4.3) + 2.5;
-  const parrafoDatos2 = "Esta página funciona completamente en el navegador de quien la usa: ningún dato ingresado se envía a un servidor ni se almacena en ninguna base de datos. La información sólo está disponible en pantalla mientras dura la prueba y se pierde automáticamente al cerrar o recargar la página. Una vez generados los PDF de consentimiento y de reporte, no queda ningún dato almacenado en la página; la única copia que existe es la que se descarga en ese momento.";
+  const parrafoDatos2 = "Este documento se generó a partir de un formulario digital que procesa la información exclusivamente en el dispositivo de quien lo diligencia, sin transmitirla a ningún servidor ni almacenarla en bases de datos externas. El presente PDF constituye el único registro existente de los datos aquí consignados: una vez descargado, la aplicación no conserva copia alguna de la información.";
   y = escribirParrafo(doc, parrafoDatos2, MX2, y, AU2, 4.3) + 2;
 
   y += 2;
