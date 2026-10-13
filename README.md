@@ -1,52 +1,40 @@
 # Tests de campo — Medicina del Deporte (UdeA)
 
-Página web con las proformas de tests de campo (valoración pre-test, PAR-Q, consentimiento informado con firma digital, hoja de registro y cálculo automático), lista para publicar en GitHub Pages.
+Página web con las proformas de tests de campo de Medicina del Deporte y la Actividad Física: valoración pre-test, PAR-Q, consentimiento informado con firma digital, hoja de registro y cálculo automático del resultado.
 
-**Todo funciona dentro del navegador de quien la usa.** No hay servidor, no hay base de datos, no se envía ningún dato a ningún lado — por eso no hace falta configurar nada además de subir los archivos.
+**Todo funciona dentro del navegador de quien la usa.** No hay servidor ni base de datos: ningún dato ingresado se envía ni se almacena en ningún lugar. La información solo existe en pantalla mientras dura la prueba, y la única copia que queda es el PDF que se descarga al finalizar.
 
-Incluye por ahora el **test de caminata de 1 milla (Rockport Walk Test)**, siguiendo el artículo de Kline y cols. (1987) para el cálculo del VO₂máx y la fórmula de Tanaka, Monahan & Seals (2001) para la FC máxima estimada (208 − 0,7 × edad). Un "test de laboratorio" queda como "próximamente" en el catálogo, como espacio reservado para el siguiente test que se agregue.
+## Tests incluidos
 
-El formulario permite indicar quién realiza el test (tú o un examinador externo): si es otra persona, se habilita un espacio para que dibuje su firma y registre su número de registro médico (RM), que se incluyen junto con el participante en ambos PDF. El pie institucional de la Universidad de Antioquia solo aparece en los documentos cuando tú eres el examinador. Los PDF descargables se nombran automáticamente con el nombre del paciente, para que sean fáciles de identificar en tus archivos.
+**Test de caminata de 1 milla (Rockport Walk Test)**, siguiendo el artículo de Kline y cols. (1987) para la estimación del VO₂máx, y la fórmula de Tanaka, Monahan & Seals (2001) para la FC máxima estimada (208 − 0,7 × edad). Un "test de laboratorio" queda como "próximamente" en el catálogo, como espacio reservado para el siguiente test que se agregue.
 
-## Archivos de esta carpeta
+El formulario incluye:
+
+- Lista de chequeo de material y preparación, tanto para el examinador como para el participante.
+- Valoración pre-test (datos del participante, antecedentes, signos vitales basales) y PAR-Q.
+- Consentimiento informado con firma digital del participante.
+- Selección de quién realiza el test: si es una persona distinta del Dr. Daniel Salcedo, se habilita un espacio para que dibuje su firma y registre su número de registro médico (RM), que quedan junto a los del participante en ambos documentos.
+- Cálculo automático del VO₂máx (en L/min y en ml·kg⁻¹·min⁻¹) a partir de peso, edad, sexo, tiempo de caminata y frecuencia cardíaca del último cuarto de milla.
+- Generación de dos documentos en PDF: el consentimiento informado firmado y el reporte completo del test, con el nombre del paciente incluido automáticamente en el nombre del archivo descargado.
+
+## Archivos del proyecto
 
 - `index.html` — catálogo/portada con la lista de tests.
-- `milla.html` — el formulario del test de la milla (incluye la lista de chequeo, la valoración, el PAR-Q, el consentimiento y la hoja de registro).
+- `milla.html` — el formulario del test de la milla (lista de chequeo, valoración, PAR-Q, consentimiento y hoja de registro).
 - `jspdf.umd.min.js` — librería para generar los PDF (no requiere internet).
-- `logo-header.png` — tu logo a color, usado en la cabecera de la página (catálogo y formulario).
-- `logo-pdf.png` — tu logo en versión monocromática, usado en la barra lateral de los PDF (reporte y consentimiento).
-- `favicon.ico` y `favicon.png` — ícono de la pestaña del navegador (la insignia circular de tu logo).
+- `logo-header.png` — logo a color, usado en la cabecera de la página (catálogo y formulario).
+- `logo-pdf.png` — logo en versión monocromática, usado en la barra lateral de los PDF (reporte y consentimiento).
+- `favicon.ico` y `favicon.png` — ícono de la pestaña del navegador (insignia circular del logo).
 - `formula-vo2-lmin.png` y `formula-vo2-relativo.png` — las dos ecuaciones de Kline y cols. (1987), tipografiadas en notación matemática (TeX), tal como aparecen en la página junto al formulario.
-- `firma-sello.png` — tu firma y sello, usados automáticamente en el reporte y el consentimiento cuando eliges "Daniel" en "¿Quién realiza el test?".
+- `firma-sello.png` — firma y sello del Dr. Daniel Salcedo, usados automáticamente en el reporte y el consentimiento cuando se elige "Daniel" en "¿Quién realiza el test?".
 
-No cambies los nombres de estos archivos: el código los busca exactamente con esos nombres.
+El código hace referencia a estos archivos por su nombre exacto, así que no deben renombrarse.
 
-## Cómo publicarla en GitHub Pages (sin usar la terminal)
+## Agregar un nuevo test
 
-1. Entra a [github.com](https://github.com) e inicia sesión (o crea una cuenta gratuita si no tienes).
-2. Arriba a la derecha, haz clic en el **+** y elige **New repository**.
-3. Ponle un nombre (por ejemplo `tests-medicina-deporte`), déjalo en **Public**, y haz clic en **Create repository**. No marques ninguna otra opción.
-4. En la página del repositorio recién creado, haz clic en **Add file → Upload files**.
-5. Arrastra los 10 archivos de esta carpeta (`index.html`, `milla.html`, `jspdf.umd.min.js`, `logo-header.png`, `logo-pdf.png`, `favicon.ico`, `favicon.png`, `formula-vo2-lmin.png`, `formula-vo2-relativo.png`, `firma-sello.png`) a la ventana del navegador, o haz clic en "choose your files" y selecciónalos todos a la vez.
-6. Baja hasta el final de la página y haz clic en **Commit changes**.
-7. Ve a la pestaña **Settings** del repositorio (arriba).
-8. En el menú de la izquierda, haz clic en **Pages**.
-9. En "Build and deployment", donde dice **Branch**, selecciona `main` y la carpeta `/ (root)`, luego haz clic en **Save**.
-10. Espera un minuto y actualiza la página. GitHub te mostrará un enlace como:
-    `https://tu-usuario.github.io/tests-medicina-deporte/`
-
-Esa es la dirección pública de tu catálogo de tests. Cualquiera con el enlace puede abrirla y usarla desde su celular o computador, sin instalar nada.
-
-## Cómo actualizar la página más adelante
-
-Cada vez que quieras cambiar algo (agregar un test nuevo, corregir un texto), edita el archivo correspondiente y vuelve a subirlo desde **Add file → Upload files** en el mismo repositorio — GitHub reemplaza el archivo anterior automáticamente y la página publicada se actualiza sola en uno o dos minutos.
-
-## Cómo agregar un nuevo test más adelante
-
-1. Copia `milla.html`, cámbiale el nombre (por ejemplo `veinte-metros.html`) y ajusta el contenido (preguntas, campos, ecuación) siguiendo estrictamente el artículo original de ese test.
-2. Agrega una tarjeta nueva en `index.html` que enlace a ese archivo (hay una tarjeta de ejemplo ya deshabilitada — "Test de laboratorio" — que puedes copiar, editar y activar).
-3. Sube ambos archivos actualizados igual que en el paso 5 de arriba.
+1. Copiar `milla.html`, renombrarlo (por ejemplo `veinte-metros.html`) y ajustar el contenido (preguntas, campos, ecuación) siguiendo estrictamente el artículo original de ese test.
+2. Agregar una tarjeta nueva en `index.html` que enlace a ese archivo (hay una tarjeta de ejemplo ya deshabilitada — "Test de laboratorio" — que puede copiarse, editarse y activarse).
 
 ## Nota sobre los PDF descargables
 
-Los botones "Descargar consentimiento informado (PDF)" y "Descargar reporte del test (PDF)" generan el archivo directamente en el navegador de quien esté usando la página — nadie más ve esos datos, ni siquiera tú, a menos que la persona te comparta el PDF descargado. El nombre del archivo descargado incluye automáticamente el nombre del paciente (por ejemplo `reporte_test_milla_Juan_Perez.pdf`), sin tildes ni caracteres especiales, para facilitar su identificación y archivo. Esto solo funciona correctamente una vez la página esté publicada en GitHub Pages (no al abrir el archivo `milla.html` haciendo doble clic en tu computador).
+Los botones "Descargar consentimiento informado (PDF)" y "Descargar reporte del test (PDF)" generan el archivo directamente en el navegador de quien esté usando la página — nadie más ve esos datos, ni siquiera el examinador, a menos que la persona comparta el PDF descargado. El nombre del archivo incluye automáticamente el nombre del paciente (por ejemplo `reporte_test_milla_Juan_Perez.pdf`), sin tildes ni caracteres especiales, para facilitar su identificación y archivo. Esta generación de PDF requiere que la página se sirva desde un servidor web (no al abrir `milla.html` haciendo doble clic directamente en el computador).
