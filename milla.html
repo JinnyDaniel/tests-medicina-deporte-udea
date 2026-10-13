@@ -151,8 +151,23 @@
     line-height:1; color:#888; cursor:pointer; padding:0;
   }
   .protocolo-panel .cerrar:hover{ color:#222; }
-  .protocolo-lista{ margin:12px 0 0; padding-left:20px; font-size:0.85rem; line-height:1.5; }
-  .protocolo-lista li{ margin-bottom:9px; }
+  .protocolo-lista{ margin:12px 0 0; padding:0; font-size:0.85rem; line-height:1.5; list-style:none; }
+  .protocolo-lista li{ margin-bottom:4px; }
+  .protocolo-lista li label{
+    display:flex; align-items:flex-start; gap:8px; margin:0; font-weight:400;
+    padding:6px 7px; border-radius:6px; cursor:pointer; transition:background 0.15s;
+  }
+  .protocolo-lista li label:hover{ background:#eff6f6; }
+  .protocolo-lista li input[type=checkbox]{
+    margin-top:3px; width:15px; height:15px; accent-color:var(--teal); flex-shrink:0; cursor:pointer;
+  }
+  .protocolo-lista li input[type=checkbox]:disabled{ cursor:default; }
+  .protocolo-lista li.marcado label{ background:#e9f6f6; }
+  .protocolo-lista li.marcado label span{
+    color:var(--azul-oscuro); font-weight:600; text-decoration:line-through;
+    text-decoration-color:var(--teal); text-decoration-thickness:1.5px;
+  }
+  .protocolo-lista .auto-nota{ display:block; margin:1px 0 0 23px; font-size:0.72rem; font-style:italic; color:#888; }
   .protocolo-nota{ font-size:0.74rem; color:#666; border-top:1px solid #eee; margin-top:12px; padding-top:10px; line-height:1.5; }
   .consigna-box{
     background:#e9f6f6; border:1px solid #bfe0de; border-left:3px solid var(--teal);
@@ -350,9 +365,9 @@
       <div><label>Peso (lb) — calculado automáticamente</label><input type="text" id="pesoLb" disabled></div>
     </div>
     <div class="fila">
-      <div><label>FC de reposo (lpm)</label><input type="number" id="fcReposo" min="30" max="220" oninput="actualizarAlertaFcReposo()"></div>
-      <div><label>TAS de reposo (mmHg)</label><input type="number" id="tasReposo" min="60" max="260" oninput="actualizarAlertaTaReposo()"></div>
-      <div><label>TAD de reposo (mmHg)</label><input type="number" id="tadReposo" min="30" max="160" oninput="actualizarAlertaTaReposo()"></div>
+      <div><label>FC de reposo (lpm)³ <button type="button" class="info-btn" data-tip="fcreposo" aria-label="Definición">?</button></label><input type="number" id="fcReposo" min="30" max="220" oninput="actualizarAlertaFcReposo()"></div>
+      <div><label>TAS de reposo (mmHg)³ <button type="button" class="info-btn" data-tip="tareposo" aria-label="Definición">?</button></label><input type="number" id="tasReposo" min="60" max="260" oninput="actualizarAlertaTaReposo()"></div>
+      <div><label>TAD de reposo (mmHg)³ <button type="button" class="info-btn" data-tip="tareposo" aria-label="Definición">?</button></label><input type="number" id="tadReposo" min="30" max="160" oninput="actualizarAlertaTaReposo()"></div>
       <div><label>FC máxima calculada¹ (208 − 0,7 × edad) <button type="button" class="info-btn" data-tip="fcmax" aria-label="Definición">?</button></label><input type="text" id="fcMax" disabled></div>
     </div>
     <div id="avisoFcReposo">ℹ FC de reposo fuera del rango habitual (&lt;40 o &gt;100 lpm). No es, por sí sola, una contraindicación: revise si es un hallazgo fisiológico (p. ej. bradicardia del deportista entrenado) o si se acompaña de síntomas o irregularidad del pulso antes de continuar.</div>
@@ -457,7 +472,8 @@
 
     <div class="cita">
       ¹ Tanaka H, Monahan KD, Seals DR. Age-predicted maximal heart rate revisited. J Am Coll Cardiol. 2001 Jan;37(1):153-6. PMID: 11153730.<br>
-      ² Kline GM, Porcari JP, Hintermeister R, Freedson PS, Ward A, McCarron RF, Ross J, Rippe JM. Estimation of VO2max from a one-mile track walk, gender, age, and body weight. Med Sci Sports Exerc. 1987;19(3):253-9.
+      ² Kline GM, Porcari JP, Hintermeister R, Freedson PS, Ward A, McCarron RF, Ross J, Rippe JM. Estimation of VO2max from a one-mile track walk, gender, age, and body weight. Med Sci Sports Exerc. 1987;19(3):253-9.<br>
+      ³ American College of Sports Medicine. ACSM's Guidelines for Exercise Testing and Prescription. 12.ª ed. Philadelphia: Wolters Kluwer; 2025. ISBN 978-1-9752-1921-5. (Tabla de contraindicaciones absolutas y relativas para la prueba de esfuerzo.)
     </div>
   </section>
 </main>
@@ -489,21 +505,22 @@
   <button type="button" class="cerrar" onclick="toggleProtocolo()" aria-label="Cerrar">&times;</button>
   <h3>Protocolo paso a paso</h3>
   <p class="subt">Test de caminata de 1 milla (Rockport Walk Test)</p>
-  <ol class="protocolo-lista">
-    <li>Diligenciar la valoración pre-test y el PAR-Q, confirmando además en el interrogatorio de medicamentos la ausencia de fármacos con efecto cronotrópico relevante (β-bloqueadores, estimulantes). Ante cualquier respuesta positiva o signo de alarma, evaluar contraindicación antes de continuar.</li>
-    <li>Explicar la prueba y firmar el consentimiento informado.</li>
-    <li>Tomar medidas basales: peso, FC y TA en reposo. Si la TA es &gt;200/110 mmHg o la FC está fuera de 40-100 lpm, evaluar antes de continuar (ver avisos del formulario).</li>
-    <li>Ajustar y verificar la telemetría de FC (monitor de pecho o palpación continua confiable) antes de iniciar el esfuerzo.</li>
-    <li>Realizar un calentamiento estandarizado: movilidad articular y caminata suave de 3 a 5 minutos.</li>
-    <li>Explicar la consigna verbal estandarizada:
+  <ul class="protocolo-lista" id="protocoloLista">
+    <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>1. Diligenciar la valoración pre-test y el PAR-Q, confirmando además en el interrogatorio de medicamentos la ausencia de fármacos con efecto cronotrópico relevante (β-bloqueadores, estimulantes). Ante cualquier respuesta positiva o signo de alarma, evaluar contraindicación antes de continuar.</span></label></li>
+    <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>2. Explicar la prueba y firmar el consentimiento informado.</span></label></li>
+    <li><label><input type="checkbox" id="checkPasoProto3" disabled><span>3. Tomar medidas basales: peso, FC y TA en reposo. Si la TA es &gt;200/110 mmHg o la FC está fuera de 40-100 lpm, evaluar antes de continuar (ver avisos del formulario).</span></label><small class="auto-nota">Se marca automáticamente al diligenciar peso, FC y TA de reposo.</small></li>
+    <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>4. Ajustar y verificar la telemetría de FC (monitor de pecho o palpación continua confiable) antes de iniciar el esfuerzo.</span></label></li>
+    <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>5. Realizar un calentamiento estandarizado: movilidad articular y caminata suave de 3 a 5 minutos.</span></label></li>
+    <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>6. Explicar la consigna verbal estandarizada:</span></label>
       <div class="consigna-box">&ldquo;Camine la milla completa lo más rápido posible, manteniendo un ritmo constante y sostenido, sin trotar ni correr en ningún momento.&rdquo;</div>
     </li>
-    <li>Iniciar el cronómetro en el momento en que el participante comienza a caminar.</li>
-    <li>Al completar la milla, detener el cronómetro (T1) y registrar de inmediato la frecuencia cardíaca del último cuarto de milla (HR1-4).</li>
-    <li>Realizar la evaluación posterior: FC y TA de recuperación, e indagar síntomas.</li>
-    <li>Calcular el VO₂máx con la ecuación de Kline y cols. (1987), usando peso, edad, sexo, T1 y HR1-4.</li>
-    <li>Registrar el resultado y descargar/archivar los PDF de esta proforma.</li>
-  </ol>
+    <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>7. Iniciar el cronómetro en el momento en que el participante comienza a caminar.</span></label></li>
+    <li><label><input type="checkbox" id="checkPasoProto8" disabled><span>8. Al completar la milla, detener el cronómetro (T1) y registrar de inmediato la frecuencia cardíaca del último cuarto de milla (HR1-4).</span></label><small class="auto-nota">Se marca automáticamente al diligenciar T1 y HR1-4.</small></li>
+    <li><label><input type="checkbox" onchange="toggleChecklistItem(this)"><span>9. Realizar la evaluación posterior: indagar síntomas y verificar que el participante vuelve a un estado estable antes de darlo de alta del sitio de la prueba.</span></label></li>
+    <li><label><input type="checkbox" id="checkPasoProto10" disabled><span>10. Calcular el VO₂máx con la ecuación de Kline y cols. (1987), usando peso, edad, sexo, T1 y HR1-4.</span></label><small class="auto-nota">Se marca automáticamente al calcular el resultado.</small></li>
+    <li><label><input type="checkbox" id="checkPasoProto11" disabled><span>11. Registrar el resultado y descargar/archivar los PDF de esta proforma.</span></label><small class="auto-nota">Se marca automáticamente al descargar un PDF.</small></li>
+  </ul>
+  <button type="button" class="secundario" style="margin-top:10px; font-size:0.78rem; padding:6px 12px;" onclick="reiniciarProtocoloChecklist()">Reiniciar casillas del protocolo</button>
   <p class="protocolo-nota">HR1-4 = promedio de las dos últimas lecturas de FC de 1 min (monitoreo continuo) al llegar al último cuarto de milla. Una sola lectura puntual al finalizar es una aproximación práctica, no el procedimiento exacto del artículo original.<br>Kline GM, Porcari JP, Hintermeister R, Freedson PS, Ward A, McCarron RF, Ross J, Rippe JM. <em>Med Sci Sports Exerc.</em> 1987;19(3):253-9.</p>
 </div>
 
@@ -575,6 +592,8 @@ actualizarQuienRealiza();
 
 // ---------- Tooltips de definición ("?") ----------
 const DEFINICIONES_CAMPO = {
+  fcreposo: "No es una variable de la ecuación de Kline y cols.² (1987): se registra por seguridad, como parte del tamizaje pre-participación. El aviso fuera de 40-100 lpm es informativo, no un criterio de exclusión automático —el ACSM³ contraindica la arritmia (taqui o bradidisritmia), no la frecuencia aislada—: una FC baja puede ser bradicardia fisiológica del deportista entrenado (tono vagal aumentado), y una elevada puede deberse a fiebre, deshidratación, ansiedad o estimulantes (incluida la cafeína). Revise el contexto antes de decidir si amerita evaluación adicional.",
+  tareposo: "Tampoco es una variable de la ecuación de Kline y cols.² (1987): se registra por seguridad, como parte del tamizaje pre-participación. El umbral de alerta (TAS >200 y/o TAD >110 mmHg) corresponde a la contraindicación relativa para pruebas de esfuerzo del ACSM³: por encima de ese punto, el riesgo de una respuesta hipertensiva exagerada al esfuerzo amerita evaluación médica antes de continuar con la prueba.",
   t1: "Tiempo total transcurrido en caminar la milla completa (1609 m).",
   hr14: "Promedio de las dos últimas lecturas de frecuencia cardíaca de 1 minuto (monitoreo continuo) al llegar al último cuarto de milla. Una lectura puntual única al finalizar es una aproximación práctica a este método.",
   fcmax: "El artículo emplea la frecuencia cardíaca máxima edad-predicha como uno de los criterios para confirmar el esfuerzo máximo real en su propio protocolo de banda, sin especificar una fórmula propia para calcularla. Aquí se aplica la ecuación de Tanaka, Monahan y Seals (2001): 208 − 0,7 × edad, derivada de un metaanálisis de ~18.700 sujetos que corrige el sesgo sistemático de la fórmula clásica de Fox y cols. (1971, 220 − edad), la cual sobreestima la FCmáx en personas jóvenes y la subestima en mayores de ~40-45 años.",
@@ -629,6 +648,34 @@ document.addEventListener("click", (e) => {
 // ---------- Lista de chequeo ----------
 function toggleChecklistItem(checkbox) {
   checkbox.closest("li").classList.toggle("marcado", checkbox.checked);
+}
+
+// ---------- Protocolo: pasos que se marcan solos a partir del formulario ----------
+// Solo los pasos con una señal inequívoca en el formulario se marcan en automático (3, 8, 10, 11).
+// Los demás (acciones físicas/verbales en la pista, o controles que el formulario no puede verificar
+// como "se preguntó por fármacos cronotrópicos" o "se indagaron síntomas") quedan como casillas
+// manuales: marcarlos solo porque un campo tiene texto daría una falsa sensación de control cumplido.
+function marcarPasoAuto(idCheckbox, cumplido) {
+  const checkbox = document.getElementById(idCheckbox);
+  if (!checkbox) return;
+  checkbox.checked = cumplido;
+  checkbox.closest("li").classList.toggle("marcado", cumplido);
+}
+function actualizarProtocoloAuto() {
+  const relleno = (id) => (document.getElementById(id).value || "").trim() !== "";
+  marcarPasoAuto("checkPasoProto3", relleno("peso") && relleno("fcReposo") && relleno("tasReposo") && relleno("tadReposo"));
+  marcarPasoAuto("checkPasoProto8", relleno("t1min") && relleno("hr14"));
+}
+document.querySelectorAll("#peso, #fcReposo, #tasReposo, #tadReposo, #t1min, #t1seg, #hr14").forEach((el) => {
+  el.addEventListener("input", actualizarProtocoloAuto);
+});
+
+function reiniciarProtocoloChecklist() {
+  document.querySelectorAll("#protocoloLista li").forEach((li) => {
+    li.classList.remove("marcado");
+    const checkbox = li.querySelector("input[type=checkbox]");
+    if (checkbox) checkbox.checked = false;
+  });
 }
 
 // ---------- Cronómetro flotante ----------
@@ -973,6 +1020,7 @@ function calcularVO2() {
   document.getElementById("valorLmin").textContent = vo2Lmin.toFixed(2);
   document.getElementById("valorRelativo").textContent = vo2Relativo.toFixed(1);
   document.getElementById("resultadoBox").style.display = "block";
+  marcarPasoAuto("checkPasoProto10", true);
 }
 
 // ---------- Utilidad: cargar imagen local como dataURL para el PDF ----------
@@ -1320,6 +1368,7 @@ async function descargarConsentimiento() {
   doc.setTextColor(0, 0, 0);
 
   doc.save(`consentimiento_informado_${sanitizarNombreArchivo(nombre)}.pdf`);
+  marcarPasoAuto("checkPasoProto11", true);
 }
 
 // ---------- PDF: Reporte del test (diseño con barra lateral) ----------
@@ -1477,6 +1526,7 @@ async function descargarReporte() {
   }
 
   doc.save(`reporte_test_milla_${sanitizarNombreArchivo(val("nombre"))}.pdf`);
+  marcarPasoAuto("checkPasoProto11", true);
 }
 </script>
 </body>
