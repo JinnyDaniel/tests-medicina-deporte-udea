@@ -625,18 +625,70 @@ document.addEventListener("click", (e) => {
   }
 });
 
+// ---------- Protocolo y cronómetro flotantes: evitar que se superpongan ----------
+// Ambos paneles pueden estar abiertos al mismo tiempo. La posición base de cualquiera
+// de los dos (abierto solo) se calcula para que quede por encima de los DOS botones
+// (así ninguno tapa el botón del otro); si los dos paneles están abiertos a la vez, el
+// cronómetro se reubica dinámicamente encima del panel del protocolo (midiendo su alto
+// real) para que tampoco se tapen entre sí.
+const GAP_PANELES = 14;
+
+function actualizarPosicionPaneles() {
+  const protocoloPanel = document.getElementById("protocoloPanel");
+  const cronometroPanel = document.getElementById("cronometroPanel");
+  const protocoloFab = document.getElementById("protocoloFab");
+  const cronometroFab = document.getElementById("cronometroFab");
+  const protocoloAbierto = protocoloPanel.classList.contains("abierto");
+  const cronometroAbierto = cronometroPanel.classList.contains("abierto");
+
+  const MARGEN_SUPERIOR = 12;
+  const topBotonMasAlto = Math.min(
+    protocoloFab.getBoundingClientRect().top,
+    cronometroFab.getBoundingClientRect().top
+  );
+  const baseComun = (window.innerHeight - topBotonMasAlto) + GAP_PANELES;
+
+  protocoloPanel.style.bottom = baseComun + "px";
+
+  if (protocoloAbierto && cronometroAbierto) {
+    // En pantallas bajas o angostas, los dos paneles completos no siempre caben uno
+    // encima del otro. El del protocolo ya tiene scroll interno, así que se encoge lo
+    // necesario para dejarle al cronómetro su alto completo y que ninguno quede cortado.
+    protocoloPanel.style.maxHeight = "";
+    const alturaCronometro = cronometroPanel.offsetHeight;
+    const espacioDisponible = window.innerHeight - MARGEN_SUPERIOR - baseComun - GAP_PANELES - alturaCronometro;
+    if (espacioDisponible < protocoloPanel.offsetHeight) {
+      protocoloPanel.style.maxHeight = Math.max(140, espacioDisponible) + "px";
+    }
+    const topProtocolo = baseComun + protocoloPanel.offsetHeight;
+    cronometroPanel.style.bottom = (topProtocolo + GAP_PANELES) + "px";
+  } else {
+    protocoloPanel.style.maxHeight = "";
+    cronometroPanel.style.bottom = baseComun + "px";
+  }
+}
+
 // ---------- Protocolo flotante ----------
 function toggleProtocolo() {
   const panel = document.getElementById("protocoloPanel");
   const abierto = panel.classList.toggle("abierto");
   document.getElementById("protocoloFab").setAttribute("aria-expanded", abierto ? "true" : "false");
+  actualizarPosicionPaneles();
 }
 document.addEventListener("click", (e) => {
   const panel = document.getElementById("protocoloPanel");
   const fab = document.getElementById("protocoloFab");
-  if (panel.classList.contains("abierto") && !panel.contains(e.target) && !fab.contains(e.target)) {
+  const otroFab = document.getElementById("cronometroFab");
+  const otroPanel = document.getElementById("cronometroPanel");
+  // Un clic en el botón o el panel del cronómetro no cuenta como "afuera": los dos
+  // paneles pueden estar abiertos a la vez, así que abrir uno no debe cerrar el otro.
+  if (
+    panel.classList.contains("abierto") && !panel.contains(e.target) && !fab.contains(e.target) &&
+    !otroFab.contains(e.target) && !otroPanel.contains(e.target)
+  ) {
     panel.classList.remove("abierto");
     fab.setAttribute("aria-expanded", "false");
+    actualizarPosicionPaneles();
   }
 });
 
@@ -650,15 +702,25 @@ function toggleCronometro() {
   const panel = document.getElementById("cronometroPanel");
   const abierto = panel.classList.toggle("abierto");
   document.getElementById("cronometroFab").setAttribute("aria-expanded", abierto ? "true" : "false");
+  actualizarPosicionPaneles();
 }
 document.addEventListener("click", (e) => {
   const panel = document.getElementById("cronometroPanel");
   const fab = document.getElementById("cronometroFab");
-  if (panel.classList.contains("abierto") && !panel.contains(e.target) && !fab.contains(e.target)) {
+  const otroFab = document.getElementById("protocoloFab");
+  const otroPanel = document.getElementById("protocoloPanel");
+  // Mismo criterio que arriba: un clic en el botón o el panel del protocolo no
+  // debe cerrar el cronómetro, para que ambos puedan quedar abiertos a la vez.
+  if (
+    panel.classList.contains("abierto") && !panel.contains(e.target) && !fab.contains(e.target) &&
+    !otroFab.contains(e.target) && !otroPanel.contains(e.target)
+  ) {
     panel.classList.remove("abierto");
     fab.setAttribute("aria-expanded", "false");
+    actualizarPosicionPaneles();
   }
 });
+window.addEventListener("resize", actualizarPosicionPaneles);
 
 let cronoCorriendo = false;
 let cronoInicioMs = 0;
