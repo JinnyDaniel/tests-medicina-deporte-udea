@@ -33,11 +33,6 @@ El formulario incluye:
 
 El código hace referencia a estos archivos por su nombre exacto, así que no deben renombrarse.
 
-## Agregar un nuevo test
-
-1. Copiar `milla.html`, renombrarlo (por ejemplo `veinte-metros.html`) y ajustar el contenido (preguntas, campos, ecuación) siguiendo estrictamente el artículo original de ese test.
-2. Agregar una tarjeta nueva en `index.html` que enlace a ese archivo (puede copiarse y editarse una de las tarjetas existentes; para dejar un test "Próximamente", usar la clase `disabled` y el distintivo `pendiente`).
-
 ## Nota sobre los PDF descargables
 
 Los botones "Descargar consentimiento informado (PDF)" y "Descargar reporte del test (PDF)" generan el archivo directamente en el navegador de quien esté usando la página — nadie más ve esos datos, ni siquiera el examinador, a menos que la persona comparta el PDF descargado. El nombre del archivo incluye automáticamente el nombre del paciente (por ejemplo `reporte_test_milla_Juan_Perez.pdf`), sin tildes ni caracteres especiales, para facilitar su identificación y archivo. Esta generación de PDF requiere que la página se sirva desde un servidor web (no al abrir `milla.html` haciendo doble clic directamente en el computador).
