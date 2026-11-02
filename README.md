@@ -14,7 +14,7 @@ El formulario incluye:
 - Lista de chequeo de material y preparación, tanto para el examinador como para el participante.
 - Valoración pre-test (datos del participante, antecedentes, signos vitales basales) y PAR-Q.
 - Consentimiento informado con firma digital del participante.
-- Selección de quién realiza el test: si es una persona distinta del Dr. Daniel Salcedo, se habilita un espacio para que dibuje su firma y registre su número de registro médico (RM), que quedan junto a los del participante en ambos documentos.
+- Firma digital y registro médico (RM) del examinador: quien use el formulario dibuja su propia firma y escribe su RM, que quedan junto a los del participante en ambos documentos. No hay ninguna firma precargada: cada examinador firma con la suya.
 - Cálculo automático del VO₂máx (en L/min y en ml·kg⁻¹·min⁻¹) a partir de peso, edad, sexo, tiempo de caminata y frecuencia cardíaca del último cuarto de milla.
 - Generación de dos documentos en PDF: el consentimiento informado firmado y el reporte completo del test, con el nombre del paciente incluido automáticamente en el nombre del archivo descargado.
 
@@ -29,7 +29,7 @@ El formulario incluye:
 - `favicon.ico` y `favicon.png` — ícono de la pestaña del navegador (insignia circular del logo).
 - `formula-vo2-lmin.png` y `formula-vo2-relativo.png` — las dos ecuaciones de Kline y cols. (1987), tipografiadas en notación matemática (TeX), tal como aparecen en la página junto al formulario.
 - `formula-bruce-vo2.png`, `formula-bruce-fai.png` y `formula-bruce-pred.png` — las ecuaciones 7, 1 y 3 a 6 de Bruce y cols. (1973), tipografiadas en TeX (KaTeX) con el mismo estilo que las de la milla.
-- `firma-sello.png` — firma y sello del Dr. Daniel Salcedo, usados automáticamente en el reporte y el consentimiento cuando se elige "Daniel" en "¿Quién realiza el test?".
+- `foto-autor.jpg` — foto usada en la sección "Acerca del autor" del catálogo.
 
 El código hace referencia a estos archivos por su nombre exacto, así que no deben renombrarse.
 

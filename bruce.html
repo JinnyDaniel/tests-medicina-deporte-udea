@@ -365,18 +365,12 @@
   <section class="bloque">
     <h2>2. Valoración pre-test</h2>
     <div class="fila">
-      <div><label>¿Quién realiza el test?</label>
-        <select id="quienRealiza" onchange="actualizarQuienRealiza()">
-          <option value="yo">Daniel</option>
-          <option value="otro">Otro</option>
-        </select>
-      </div>
       <div><label>Fecha</label><input type="text" id="fecha"></div>
       <div><label>Hora</label><input type="text" id="hora"></div>
       <div><label>Examinador</label><input type="text" id="examinador"></div>
     </div>
 
-    <div id="bloqueFirmaExaminadorOtro" class="firma-wrap" style="display:none;">
+    <div id="bloqueFirmaExaminadorOtro" class="firma-wrap">
       <label>Firma del examinador (dibuje con el mouse o el dedo)</label>
       <canvas id="firmaExaminadorCanvas"></canvas>
       <div class="firma-botones">
@@ -724,24 +718,6 @@ function sanitizarNombreArchivo(texto) {
     .replace(/^_+|_+$/g, "");
   return base || "sin_nombre";
 }
-
-// ---------- ¿Quién realiza el test? (autocompleta examinador y habilita firma/sello) ----------
-const NOMBRE_EXAMINADOR_PROPIO = "Dr. Daniel Salcedo P.";
-const RM_EXAMINADOR_PROPIO = "1012383458";
-function actualizarQuienRealiza() {
-  const quien = document.getElementById("quienRealiza").value;
-  const elExaminador = document.getElementById("examinador");
-  const bloqueOtro = document.getElementById("bloqueFirmaExaminadorOtro");
-  if (quien === "yo") {
-    elExaminador.value = NOMBRE_EXAMINADOR_PROPIO;
-    if (bloqueOtro) bloqueOtro.style.display = "none";
-  } else {
-    elExaminador.value = "";
-    if (bloqueOtro) bloqueOtro.style.display = "block";
-    if (typeof ajustarCanvasExaminador === "function") ajustarCanvasExaminador();
-  }
-}
-actualizarQuienRealiza();
 
 // ---------- Protocolo de Bruce (Bruce, Kusumi y Hosmer, 1973): estadios de 3 min ----------
 // Estadios I a IV: Figura 1 y Tabla III del artículo. Estadios V a VII: nota al pie de la Tabla III
@@ -1534,7 +1510,7 @@ function etiquetaEvaluado(sexoVal) {
   return sexoVal === "1" ? "Evaluado" : (sexoVal === "0" ? "Evaluada" : "Evaluado/a");
 }
 
-function dibujarSidebarD(doc, { logoDataUrl, dimLogo, etiquetaPersona, nombre, doc_id, edad, sexoTexto, contactoNombre, contactoTel, fecha, examinador, registroMedico, esPropio }) {
+function dibujarSidebarD(doc, { logoDataUrl, dimLogo, etiquetaPersona, nombre, doc_id, edad, sexoTexto, contactoNombre, contactoTel, fecha, examinador, registroMedico }) {
   doc.setFillColor(...TEAL_CLARO_SIDEBAR);
   doc.rect(0, 0, SW, 297, "F");
   doc.setDrawColor(...BORDE_SIDEBAR); doc.setLineWidth(0.6);
@@ -1573,12 +1549,6 @@ function dibujarSidebarD(doc, { logoDataUrl, dimLogo, etiquetaPersona, nombre, d
     lineas([`RM ${registroMedico}`], 7.8, [90, 95, 92]);
   }
 
-  if (esPropio) {
-    doc.setDrawColor(...BORDE_SIDEBAR); doc.setLineWidth(0.15);
-    doc.line(9, 262, SW - 9, 262);
-    doc.setFont(undefined, "normal"); doc.setFontSize(6.4); doc.setTextColor(120, 130, 124);
-    doc.text("Medicina del Deporte y la\nActividad Física\nUniversidad de Antioquia", 9, 268);
-  }
   doc.setTextColor(0, 0, 0);
 }
 
@@ -1611,39 +1581,6 @@ function camposListaD(doc, pares, y, tam = 8.4, salto = 4.9) {
     y += Math.max(1, ls.length) * salto;
   });
   return y + 2;
-}
-
-async function encabezadoPDF(doc, tituloDocumento) {
-  const logoPersonal = await cargarImagenComoDataURL("logo-pdf.png");
-  let y = 14;
-  if (logoPersonal) {
-    // Aspecto real del logo calculado dinámicamente para no deformar el texto que contiene.
-    const dimLogo = await obtenerDimensionesImagen(logoPersonal);
-    const anchoLogo = 58;
-    const altoLogo = dimLogo ? anchoLogo * (dimLogo.alto / dimLogo.ancho) : anchoLogo * (212 / 613);
-    doc.addImage(logoPersonal, "PNG", MARGEN_X, y, anchoLogo, altoLogo);
-  }
-  doc.setTextColor(...PDF_AZUL_OSCURO);
-  doc.setFontSize(10.5);
-  doc.setFont(undefined, "bold");
-  doc.text("Dr. Daniel Salcedo P.", 195, y + 6, { align: "right" });
-  doc.setFont(undefined, "normal");
-  doc.setFontSize(8.7);
-  doc.setTextColor(...PDF_GRIS);
-  doc.text("Medicina del Deporte y la Actividad Física", 195, y + 11.5, { align: "right" });
-  doc.text("Universidad de Antioquia", 195, y + 16.5, { align: "right" });
-  doc.text("RM 1012383458", 195, y + 21.5, { align: "right" });
-  y += 34;
-
-  doc.setFillColor(...PDF_TEAL);
-  doc.roundedRect(MARGEN_X, y, ANCHO_UTIL, 10, 1.5, 1.5, "F");
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(11.5);
-  doc.setFont(undefined, "bold");
-  doc.text(tituloDocumento, 105, y + 6.8, { align: "center" });
-  doc.setFont(undefined, "normal");
-  doc.setTextColor(0, 0, 0);
-  return y + 16;
 }
 
 function tituloSeccionPDF(doc, texto, y) {
@@ -1690,23 +1627,16 @@ function escribirParrafo(doc, texto, x, y, maxAncho, alturaLinea) {
 }
 
 // ---------- PDF: Consentimiento informado (diseño con barra lateral) ----------
-// Firma (y sello/RM) del examinador para los PDF: la imagen de Daniel si él mismo hace el
-// test, o la firma dibujada + registro médico ingresados cuando lo hace otra persona.
+// Firma digital del examinador
 async function obtenerFirmaExaminadorPdf() {
-  const esPropio = document.getElementById("quienRealiza").value === "yo";
-  if (esPropio) {
-    const dataUrl = await cargarImagenComoDataURL("firma-sello.png");
-    const dim = await obtenerDimensionesImagen(dataUrl);
-    return { dataUrl, ratio: dim.alto / dim.ancho, registroMedico: RM_EXAMINADOR_PROPIO, esPropio: true };
-  }
   const registroMedico = (document.getElementById("registroMedicoExaminador").value || "").trim().replace(/^RM\.?\s*/i, "");
   if (firmaExaminadorEstaVacia()) {
-    return { dataUrl: null, ratio: null, registroMedico, esPropio: false };
+    return { dataUrl: null, ratio: null, registroMedico };
   }
   return {
     dataUrl: canvasExaminador.toDataURL("image/png"),
     ratio: canvasExaminador.height / canvasExaminador.width,
-    registroMedico, esPropio: false,
+    registroMedico,
   };
 }
 
@@ -1720,7 +1650,7 @@ async function descargarConsentimiento() {
     alert("Falta la firma del participante.");
     return;
   }
-  if (document.getElementById("quienRealiza").value === "otro" && firmaExaminadorEstaVacia()) {
+  if (firmaExaminadorEstaVacia()) {
     alert("Falta la firma del examinador.");
     return;
   }
@@ -1745,7 +1675,7 @@ async function descargarConsentimiento() {
     contactoNombre: document.getElementById("contactoEmergenciaNombre").value,
     contactoTel: document.getElementById("contactoEmergenciaTel").value,
     fecha, examinador: evaluador,
-    registroMedico: firmaExaminador.registroMedico, esPropio: firmaExaminador.esPropio,
+    registroMedico: firmaExaminador.registroMedico,
   };
   dibujarSidebarD(doc, paramsSidebar);
 
@@ -1828,8 +1758,8 @@ async function descargarConsentimiento() {
   doc.text("Firma del participante", MX2, y + 4.2);
   if (firmaExaminador.dataUrl) {
     doc.line(xExaminador, y, xExaminador + anchoFirmaE, y);
-    doc.text(firmaExaminador.esPropio ? "Firma y sello del examinador" : "Firma del examinador", xExaminador, y + 4.2);
-    if (!firmaExaminador.esPropio && firmaExaminador.registroMedico) {
+    doc.text("Firma del examinador", xExaminador, y + 4.2);
+    if (firmaExaminador.registroMedico) {
       doc.setFontSize(7.2);
       doc.text(`Registro médico: ${firmaExaminador.registroMedico}`, xExaminador, y + 8.4);
     }
@@ -1905,7 +1835,7 @@ async function descargarReporte() {
     nombre: val("nombre"), doc_id: val("id"), edad: val("edad"), sexoTexto,
     contactoNombre: val("contactoEmergenciaNombre"), contactoTel: val("contactoEmergenciaTel"),
     fecha: val("fecha"), examinador: val("examinador"),
-    registroMedico: firmaExaminador.registroMedico, esPropio: firmaExaminador.esPropio,
+    registroMedico: firmaExaminador.registroMedico,
   };
   dibujarSidebarD(doc, paramsSidebar);
   const nuevaPagina = () => { doc.addPage(); dibujarSidebarD(doc, paramsSidebar); return 20; };
@@ -2101,8 +2031,8 @@ async function descargarReporte() {
     doc.setDrawColor(180, 180, 180); doc.setLineWidth(0.2);
     doc.line(MX2, y, MX2 + anchoFirma, y);
     doc.setFontSize(7.8); doc.setTextColor(...PDF_GRIS);
-    doc.text(firmaExaminador.esPropio ? "Firma y sello del examinador" : "Firma del examinador", MX2, y + 4.2);
-    if (!firmaExaminador.esPropio && firmaExaminador.registroMedico) {
+    doc.text("Firma del examinador", MX2, y + 4.2);
+    if (firmaExaminador.registroMedico) {
       doc.setFontSize(7.2);
       doc.text(`Registro médico: ${firmaExaminador.registroMedico}`, MX2, y + 8.4);
     }
